@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Leads Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1629;
+    --navy-2: #161f3a;
+    --navy-3: #1e2a4a;
+    --navy-4: #243260;
+    --saffron: #FF6B35;
+    --saffron-dim: rgba(255, 107, 53, 0.15);
+    --gold: #F5A623;
+    --white: #F0F2F8;
+    --white-dim: rgba(240, 242, 248, 0.6);
+    --white-faint: rgba(240, 242, 248, 0.08);
+    --hot: #FF4757;
+    --hot-bg: rgba(255, 71, 87, 0.12);
+    --high: #FF6B35;
+    --high-bg: rgba(255, 107, 53, 0.12);
+    --online: #2ED573;
+    --online-bg: rgba(46, 213, 115, 0.12);
+    --low: #748FFC;
+    --low-bg: rgba(116, 143, 252, 0.12);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy-2);
+    border-bottom: 1px solid var(--white-faint);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--saffron);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+
+  .header-meta {
+    font-size: 0.78rem;
+    color: var(--white-dim);
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--white-faint);
+    border-bottom: 1px solid var(--white-faint);
+  }
+
+  .stat-cell {
+    background: var(--navy-2);
+    padding: 1.2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .stat-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .stat-number.hot { color: var(--hot); }
+  .stat-number.high { color: var(--saffron); }
+  .stat-number.online { color: var(--online); }
+  .stat-number.total { color: var(--white); }
+
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--white-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    padding: 1.5rem 2rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    max-width: 360px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--white-dim);
+    pointer-events: none;
+  }
+
+  input[type="search"] {
+    width: 100%;
+    background: var(--navy-3);
+    border: 1px solid var(--white-faint);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="search"]:focus {
+    border-color: var(--saffron);
+  }
+
+  input[type="search"]::placeholder { color: var(--white-dim); }
+
+  .filter-tabs {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--white-faint);
+    background: transparent;
+    color: var(--white-dim);
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .filter-tab:hover { border-color: var(--saffron); color: var(--white); }
+  .filter-tab.active { background: var(--saffron); border-color: var(--saffron); color: #fff; }
+  .filter-tab.active-hot { background: var(--hot); border-color: var(--hot); color: #fff; }
+  .filter-tab.active-online { background: var(--online); border-color: var(--online); color: var(--navy); }
+  .filter-tab.active-low { background: var(--low); border-color: var(--low); color: #fff; }
+
+  .sort-select {
+    background: var(--navy-3);
+    border: 1px solid var(--white-faint);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .results-count {
+    margin-left: auto;
+    font-size: 0.78rem;
+    color: var(--white-dim);
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem 2rem 3rem;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--navy-2);
+    border: 1px solid var(--white-faint);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 107, 53, 0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  /* left accent strip */
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 12px 0 0 12px;
+  }
+
+  .card[data-cat="Hot Lead"]::before { background: var(--hot); }
+  .card[data-cat="High Priority"]::before { background: var(--saffron); }
+  .card[data-cat="Strong Online Presence"]::before { background: var(--online); }
+  .card[data-cat="Low Priority"]::before { background: var(--low); }
+
+  /* ── CARD HEADER ── */
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .card-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  /* ── SCORE RING ── */
+  .score-ring {
+    flex-shrink: 0;
+    position: relative;
+    width: 52px;
+    height: 52px;
+  }
+
+  .score-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  .score-ring-track {
+    fill: none;
+    stroke: var(--white-faint);
+    stroke-width: 4;
+  }
+
+  .score-ring-fill {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+  }
+
+  .score-ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+
+  .badge-hot { background: var(--hot-bg); color: var(--hot); }
+  .badge-high { background: var(--high-bg); color: var(--high); }
+  .badge-online { background: var(--online-bg); color: var(--online); }
+  .badge-low { background: var(--low-bg); color: var(--low); }
+
+  .badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ── CARD INFO ROWS ── */
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 0.25rem;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    color: var(--white-dim);
+  }
+
+  .info-icon {
+    width: 14px;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .info-value {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .info-value a {
+    color: var(--online);
+    text-decoration: none;
+  }
+
+  .info-value a:hover { text-decoration: underline; }
+
+  /* ── CARD FOOTER ── */
+  .card-footer {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--white-faint);
+  }
+
+  .btn {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    transition: opacity 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .btn:hover { opacity: 0.85; }
+
+  .btn-primary {
+    background: var(--saffron);
+    color: #fff;
+  }
+
+  .btn-ghost {
+    background: var(--white-faint);
+    color: var(--white-dim);
+    border: 1px solid var(--white-faint);
+  }
+
+  .btn-disabled {
+    background: var(--white-faint);
+    color: rgba(240,242,248,0.25);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ── EMPTY ── */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 4rem;
+    color: var(--white-dim);
+    font-size: 0.95rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .grid { padding: 1rem; }
+    .controls { padding: 1rem; }
+    .stat-cell { padding: 1rem; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    header { padding: 0 1rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-dot { animation: none; }
+    .card { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    LeadScope — Restaurant Outreach
+  </div>
+  <div class="header-meta">Indore / Bhopal Region · 87 Leads</div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-cell">
+    <div class="stat-number total" id="stat-total">87</div>
+    <div class="stat-label">Total Leads</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-number hot" id="stat-hot">—</div>
+    <div class="stat-label">🔥 Hot Leads</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-number high" id="stat-high">—</div>
+    <div class="stat-label">⬆ High Priority</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-number online" id="stat-online">—</div>
+    <div class="stat-label">🌐 Has Website</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="search" id="search" placeholder="Search restaurants…">
+  </div>
+
+  <div class="filter-tabs" id="filter-tabs">
+    <button class="filter-tab active" data-filter="All">All</button>
+    <button class="filter-tab" data-filter="Hot Lead">🔥 Hot Lead</button>
+    <button class="filter-tab" data-filter="High Priority">⬆ High Priority</button>
+    <button class="filter-tab" data-filter="Strong Online Presence">🌐 Online Presence</button>
+    <button class="filter-tab" data-filter="Low Priority">Low Priority</button>
+  </div>
+
+  <select class="sort-select" id="sort">
+    <option value="score-desc">Score: High → Low</option>
+    <option value="score-asc">Score: Low → High</option>
+    <option value="name-asc">Name A → Z</option>
+    <option value="name-desc">Name Z → A</option>
+  </select>
+
+  <div class="results-count" id="results-count"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const RAW = [
+  {name:"Jain Mithai Bhandar(JMB)",url:"",hasWeb:false,score:70,cat:"High Priority",phone:""},
+  {name:"Apna Sweets",url:"https://apnasweets.com/",hasWeb:true,score:15,cat:"Strong Online Presence",phone:"7611106942"},
+  {name:"Bhojanalay and Tiffin Centre",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9039106870"},
+  {name:"MY Kitchen Restaurant",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9179171921"},
+  {name:"hazi samosa center",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7489538723"},
+  {name:"Mr. Singh's Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9752091717"},
+  {name:"Nafees",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"9039090005"},
+  {name:"Saifee Restaurant",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9826517285"},
+  {name:"Saifee Hotel",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"9826517285"},
+  {name:"Mr. Beans",url:"https://mrbeans.in/indore.php",hasWeb:true,score:15,cat:"Strong Online Presence",phone:""},
+  {name:"Kebabsville",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"7389939362"},
+  {name:"Blue Lagoon",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"3544208800"},
+  {name:"Mediterra",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
+  {name:"Chopstick City",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"7389910992"},
+  {name:"Sanchi",url:"http://www.sanchiindore.com/",hasWeb:true,score:10,cat:"Strong Online Presence",phone:""},
+  {name:"babla chicken centre",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
+  {name:"Prashant Restaurant",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"7909403003"},
+  {name:"Sai prasad",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"8827443737"},
+  {name:"Neelkamal restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"7510101064"},
+  {name:"Neelkanth restaurant",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9111118858"},
+  {name:"Man bhavan",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9713989888"},
+  {name:"Kabeer roasted chicken",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
+  {name:"Krishna Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9981707374"},
+  {name:"Pitchers Cafebar",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9981118194"},
+  {name:"Pizza Hut",url:"https://restaurants.pizzahut.co.in/Madhya+Pradesh-Indore",hasWeb:true,score:20,cat:"Strong Online Presence",phone:"8655616001"},
+  {name:"Pizza Hut",url:"https://www.pizzahut.co.in/",hasWeb:true,score:15,cat:"Strong Online Presence",phone:"8655616001"},
+  {name:"Pizza Hut",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"8655616001"},
+  {name:"Pizza Hut",url:"https://restaurants.pizzahut.co.in/pizza-hut-bhawarkua-main-rd-pizza-restaurant-bhawarkua-main-rd-indore-104907/Home",hasWeb:true,score:10,cat:"Strong Online Presence",phone:"8655616001"},
+  {name:"Ambika sweets",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9826025001"},
+  {name:"Jainam food",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9399488280"},
+  {name:"Sharma Sweets",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9826235000"},
+  {name:"ATKT cafe",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7566865221"},
+  {name:"Lord of Grill",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:""},
+  {name:"Apna Punjabi Dhaba",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"8720038600"},
+  {name:"Maratha Darbar",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"919907E+11"},
+  {name:"Maayra Ka Dhaaba",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9826069654"},
+  {name:"Ramesh South Indian",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"8982967755"},
+  {name:"Panna Restaurant & Sweets",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"9329074123"},
+  {name:"D. K. Restaurant",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:""},
+  {name:"Kushwah Ji Tiffin Center",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9993631094"},
+  {name:"Kesarlal",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9926001113"},
+  {name:"Pishori Dhaba",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9303264461"},
+  {name:"Gurjar Restaurant",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"8602533302"},
+  {name:"Taste N Best",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"7240893435"},
+  {name:"Sapna Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"7890008232"},
+  {name:"Wayfare",url:"",hasWeb:false,score:80,cat:"High Priority",phone:""},
+  {name:"Satkar Pure Veg",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9479313713"},
+  {name:"Kitchen Sensation",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
+  {name:"Just Paratha",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9074282233"},
+  {name:"Radha sanchi parler",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
+  {name:"Primus Lounge",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:""},
+  {name:"Annapurna Restaurent",url:"",hasWeb:false,score:70,cat:"High Priority",phone:""},
+  {name:"vijayshree sandwhcih",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"7314977939"},
+  {name:"ridhi sidhi",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
+  {name:"Pind balluchi",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"8889688850"},
+  {name:"Satkar Pure Veg Punjabi Dhaba",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9479313713"},
+  {name:"sun food restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9755547070"},
+  {name:"Orion Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"8109612326"},
+  {name:"Mayur Dhaba",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"6264936977"},
+  {name:"Shri Gajanand Bhojanalaya",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"9009841224"},
+  {name:"Karnavat",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9109228837"},
+  {name:"Desi Tadka Restaurant",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9893979206"},
+  {name:"Mid Flight",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7415861386"},
+  {name:"Mausa",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"8588099345"},
+  {name:"The Garden",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9893507538"},
+  {name:"Wolf Casa",url:"https://www.wolf-casa.com/",hasWeb:true,score:25,cat:"Low Priority",phone:"9893522569"},
+  {name:"Hotel Apna Avenue",url:"https://www.hotelapnaavenue.com/",hasWeb:true,score:20,cat:"Strong Online Presence",phone:"9425086471"},
+  {name:"Jash Garden Restaurant",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9584533335"},
+  {name:"Eden Garden",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
+  {name:"Vrindavan Restaurant",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
+  {name:"Desi Tadka",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9893979206"},
+  {name:"Rangoon Garden",url:"",hasWeb:false,score:80,cat:"High Priority",phone:""},
+  {name:"Hunger Pangzzz",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
+  {name:"JAM",url:"https://jamgate.in/",hasWeb:true,score:25,cat:"Low Priority",phone:""},
+  {name:"hul adda",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:""},
+  {name:"Canteen",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"7697890958"},
+  {name:"Veg Bites Cafe & Restaurant",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7314910263"},
+  {name:"Nature's Kitchen Pluck & Dine",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9406802629"},
+  {name:"Apna Sweets",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"7611106942"},
+  {name:"jay ambe sweets",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"9009101313"},
+  {name:"DZire paying guest and mess",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
+  {name:"Matargasti",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
+  {name:'Vairagi Chef "Cakes and Street Food"',url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"7312400344"},
+  {name:"Royal Bakery Stores",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"9174851402"},
+  {name:"Karnawat hotel",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"8085954486"},
+  {name:"Rajesh Restuarant",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9098806125"},
+];
+
+// compute stats
+const statHot = RAW.filter(r => r.cat === "Hot Lead").length;
+const statHigh = RAW.filter(r => r.cat === "High Priority").length;
+const statOnline = RAW.filter(r => r.hasWeb).length;
+document.getElementById('stat-hot').textContent = statHot;
+document.getElementById('stat-high').textContent = statHigh;
+document.getElementById('stat-online').textContent = statOnline;
+document.getElementById('stat-total').textContent = RAW.length;
+
+const RING_R = 20, RING_CIRC = 2 * Math.PI * RING_R;
+
+function ringColor(score) {
+  if (score >= 90) return '#FF4757';
+  if (score >= 75) return '#FF6B35';
+  if (score >= 50) return '#F5A623';
+  return '#748FFC';
+}
+
+function badgeClass(cat) {
+  if (cat === 'Hot Lead') return 'badge-hot';
+  if (cat === 'High Priority') return 'badge-high';
+  if (cat === 'Strong Online Presence') return 'badge-online';
+  return 'badge-low';
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function buildCard(r) {
+  const pct = r.score / 100;
+  const dash = RING_CIRC * pct;
+  const gap = RING_CIRC - dash;
+  const color = ringColor(r.score);
+
+  const phoneHtml = r.phone
+    ? `<div class="info-row"><svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg><span><span class="info-value"><a href="tel:${r.phone}">${r.phone}</a></span></span></div>`
+    : `<div class="info-row"><svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg><span style="color:rgba(240,242,248,0.3);font-size:0.78rem">No phone found</span></div>`;
+
+  const webHtml = r.hasWeb && r.url
+    ? `<div class="info-row"><svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg><span class="info-value"><a href="${r.url}" target="_blank" rel="noopener">Website ↗</a></span></div>`
+    : '';
+
+  const callBtn = r.phone
+    ? `<a href="tel:${r.phone}" class="btn btn-primary">📞 Call</a>`
+    : `<span class="btn btn-disabled">📞 No Phone</span>`;
+
+  const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(r.name + ' restaurant')}`;
+
+  return `<div class="card" data-cat="${r.cat}">
+    <div class="card-head">
+      <div class="card-name">${r.name}</div>
+      <div class="score-ring" title="Lead Score: ${r.score}">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle class="score-ring-track" cx="26" cy="26" r="${RING_R}"/>
+          <circle class="score-ring-fill" cx="26" cy="26" r="${RING_R}"
+            stroke="${color}"
+            stroke-dasharray="${dash} ${gap}"/>
+        </svg>
+        <div class="score-ring-label" style="color:${color}">${r.score}</div>
+      </div>
+    </div>
+    <div class="badge ${badgeClass(r.cat)}">
+      <div class="badge-dot"></div>${r.cat}
+    </div>
+    <div class="card-info">
+      ${phoneHtml}
+      ${webHtml}
+    </div>
+    <div class="card-footer">
+      ${callBtn}
+      <a href="${searchUrl}" target="_blank" rel="noopener" class="btn btn-ghost">🔍 Search</a>
+    </div>
+  </div>`;
+}
+
+let currentFilter = 'All';
+let currentSearch = '';
+let currentSort = 'score-desc';
+
+function render() {
+  let data = [...RAW];
+
+  if (currentFilter !== 'All') {
+    data = data.filter(r => r.cat === currentFilter);
+  }
+
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    data = data.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.phone.includes(q)
+    );
+  }
+
+  data.sort((a, b) => {
+    switch(currentSort) {
+      case 'score-desc': return b.score - a.score;
+      case 'score-asc': return a.score - b.score;
+      case 'name-asc': return a.name.localeCompare(b.name);
+      case 'name-desc': return b.name.localeCompare(a.name);
+    }
+  });
+
+  const grid = document.getElementById('grid');
+  document.getElementById('results-count').textContent = `${data.length} result${data.length !== 1 ? 's' : ''}`;
+
+  if (data.length === 0) {
+    grid.innerHTML = `<div class="empty">No leads match your filters. Try broadening your search.</div>`;
+    return;
+  }
+
+  grid.innerHTML = data.map(buildCard).join('');
+}
+
+// filter tabs
+document.getElementById('filter-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-tab');
+  if (!btn) return;
+  currentFilter = btn.dataset.filter;
+  document.querySelectorAll('.filter-tab').forEach(b => {
+    b.className = 'filter-tab';
+    if (b === btn) {
+      const cat = b.dataset.filter;
+      if (cat === 'All') b.classList.add('active');
+      else if (cat === 'Hot Lead') b.classList.add('active-hot');
+      else if (cat === 'High Priority') b.classList.add('active');
+      else if (cat === 'Strong Online Presence') b.classList.add('active-online');
+      else b.classList.add('active-low');
+    }
+  });
+  render();
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  currentSearch = e.target.value.trim();
+  render();
+});
+
+document.getElementById('sort').addEventListener('change', e => {
+  currentSort = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
