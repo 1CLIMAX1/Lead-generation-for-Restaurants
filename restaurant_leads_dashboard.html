@@ -4,727 +4,985 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Restaurant Leads Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
 
   :root {
-    --navy: #0F1629;
-    --navy-2: #161f3a;
-    --navy-3: #1e2a4a;
-    --navy-4: #243260;
-    --saffron: #FF6B35;
-    --saffron-dim: rgba(255, 107, 53, 0.15);
-    --gold: #F5A623;
-    --white: #F0F2F8;
-    --white-dim: rgba(240, 242, 248, 0.6);
-    --white-faint: rgba(240, 242, 248, 0.08);
-    --hot: #FF4757;
-    --hot-bg: rgba(255, 71, 87, 0.12);
-    --high: #FF6B35;
-    --high-bg: rgba(255, 107, 53, 0.12);
-    --online: #2ED573;
-    --online-bg: rgba(46, 213, 115, 0.12);
-    --low: #748FFC;
-    --low-bg: rgba(116, 143, 252, 0.12);
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef2f4;
+    --line: #d9e0e5;
+    --text: #17212b;
+    --muted: #667481;
+    --accent: #0f8b8d;
+    --accent-dark: #0b6869;
+    --danger: #c23b3b;
+    --warning: #c76f1a;
+    --good: #287d4f;
+    --low: #5468c7;
+    --shadow: 0 12px 32px rgba(22, 33, 43, 0.08);
   }
 
   body {
-    font-family: 'Inter', sans-serif;
-    background: var(--navy);
-    color: var(--white);
+    margin: 0;
     min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
-  /* ── HEADER ── */
-  header {
-    background: var(--navy-2);
-    border-bottom: 1px solid var(--white-faint);
-    padding: 0 2rem;
+  button, input, select {
+    font: inherit;
+  }
+
+  a {
+    color: var(--accent-dark);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 64px;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 20;
   }
 
-  .logo {
-    font-family: 'Space Grotesk', sans-serif;
+  .brand {
+    min-width: 0;
+  }
+
+  .brand h1 {
+    margin: 0;
     font-size: 1.15rem;
-    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .brand p {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .header-actions {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    letter-spacing: -0.02em;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
-  .logo-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--saffron);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
+  main {
+    width: min(1480px, 100%);
+    margin: 0 auto;
+    padding: 1.25rem;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.4); }
-  }
-
-  .header-meta {
-    font-size: 0.78rem;
-    color: var(--white-dim);
-  }
-
-  /* ── STATS BAR ── */
-  .stats-bar {
+  .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--white-faint);
-    border-bottom: 1px solid var(--white-faint);
+    grid-template-columns: repeat(5, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
 
-  .stat-cell {
-    background: var(--navy-2);
-    padding: 1.2rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.95rem;
   }
 
-  .stat-number {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
+  .stat-value {
+    display: block;
+    font-size: 1.55rem;
+    font-weight: 750;
     line-height: 1;
-    letter-spacing: -0.03em;
   }
-
-  .stat-number.hot { color: var(--hot); }
-  .stat-number.high { color: var(--saffron); }
-  .stat-number.online { color: var(--online); }
-  .stat-number.total { color: var(--white); }
 
   .stat-label {
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--white-dim);
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--muted);
+    font-size: 0.77rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
 
-  /* ── CONTROLS ── */
-  .controls {
-    padding: 1.5rem 2rem 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-  }
-
-  .search-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 220px;
-    max-width: 360px;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 0.85rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--white-dim);
-    pointer-events: none;
-  }
-
-  input[type="search"] {
-    width: 100%;
-    background: var(--navy-3);
-    border: 1px solid var(--white-faint);
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 0.6rem 1rem 0.6rem 2.5rem;
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  input[type="search"]:focus {
-    border-color: var(--saffron);
-  }
-
-  input[type="search"]::placeholder { color: var(--white-dim); }
-
-  .filter-tabs {
-    display: flex;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-  }
-
-  .filter-tab {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid var(--white-faint);
-    background: transparent;
-    color: var(--white-dim);
-    transition: all 0.15s;
-    font-family: 'Inter', sans-serif;
-  }
-
-  .filter-tab:hover { border-color: var(--saffron); color: var(--white); }
-  .filter-tab.active { background: var(--saffron); border-color: var(--saffron); color: #fff; }
-  .filter-tab.active-hot { background: var(--hot); border-color: var(--hot); color: #fff; }
-  .filter-tab.active-online { background: var(--online); border-color: var(--online); color: var(--navy); }
-  .filter-tab.active-low { background: var(--low); border-color: var(--low); color: #fff; }
-
-  .sort-select {
-    background: var(--navy-3);
-    border: 1px solid var(--white-faint);
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    outline: none;
-    cursor: pointer;
-  }
-
-  .results-count {
-    margin-left: auto;
-    font-size: 0.78rem;
-    color: var(--white-dim);
-  }
-
-  /* ── GRID ── */
-  .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-    padding: 1.5rem 2rem 3rem;
-  }
-
-  /* ── CARD ── */
-  .card {
-    background: var(--navy-2);
-    border: 1px solid var(--white-faint);
-    border-radius: 12px;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 107, 53, 0.3);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  }
-
-  /* left accent strip */
-  .card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    border-radius: 12px 0 0 12px;
-  }
-
-  .card[data-cat="Hot Lead"]::before { background: var(--hot); }
-  .card[data-cat="High Priority"]::before { background: var(--saffron); }
-  .card[data-cat="Strong Online Presence"]::before { background: var(--online); }
-  .card[data-cat="Low Priority"]::before { background: var(--low); }
-
-  /* ── CARD HEADER ── */
-  .card-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    grid-template-columns: minmax(220px, 1fr) minmax(170px, 230px) minmax(170px, 230px) auto;
     gap: 0.75rem;
-  }
-
-  .card-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.3;
-    flex: 1;
-  }
-
-  /* ── SCORE RING ── */
-  .score-ring {
-    flex-shrink: 0;
-    position: relative;
-    width: 52px;
-    height: 52px;
-  }
-
-  .score-ring svg {
-    transform: rotate(-90deg);
-  }
-
-  .score-ring-track {
-    fill: none;
-    stroke: var(--white-faint);
-    stroke-width: 4;
-  }
-
-  .score-ring-fill {
-    fill: none;
-    stroke-width: 4;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.5s ease;
-  }
-
-  .score-ring-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
+    padding: 0.85rem;
     align-items: center;
-    justify-content: center;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
+    margin-bottom: 1rem;
   }
 
-  /* ── BADGE ── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    width: fit-content;
-  }
-
-  .badge-hot { background: var(--hot-bg); color: var(--hot); }
-  .badge-high { background: var(--high-bg); color: var(--high); }
-  .badge-online { background: var(--online-bg); color: var(--online); }
-  .badge-low { background: var(--low-bg); color: var(--low); }
-
-  .badge-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  /* ── CARD INFO ROWS ── */
-  .card-info {
+  .control {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    margin-top: 0.25rem;
+    gap: 0.3rem;
+    min-width: 0;
   }
 
-  .info-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.82rem;
-    color: var(--white-dim);
+  .control label {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
-  .info-icon {
-    width: 14px;
-    flex-shrink: 0;
-    opacity: 0.7;
+  input, select {
+    width: 100%;
+    min-height: 2.45rem;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--text);
+    padding: 0.55rem 0.7rem;
+    outline: none;
   }
 
-  .info-value {
-    color: var(--white);
-    font-weight: 500;
-  }
-
-  .info-value a {
-    color: var(--online);
-    text-decoration: none;
-  }
-
-  .info-value a:hover { text-decoration: underline; }
-
-  /* ── CARD FOOTER ── */
-  .card-footer {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: auto;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--white-faint);
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(15, 139, 141, 0.14);
   }
 
   .btn {
-    flex: 1;
-    padding: 0.5rem 0.75rem;
+    border: 1px solid transparent;
     border-radius: 7px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-align: center;
+    min-height: 2.45rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--surface-2);
+    color: var(--text);
     cursor: pointer;
-    border: none;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    transition: opacity 0.15s;
-    font-family: 'Inter', sans-serif;
+    gap: 0.4rem;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
-  .btn:hover { opacity: 0.85; }
+  .btn:hover {
+    filter: brightness(0.98);
+  }
 
   .btn-primary {
-    background: var(--saffron);
+    background: var(--accent);
     color: #fff;
   }
 
-  .btn-ghost {
-    background: var(--white-faint);
-    color: var(--white-dim);
-    border: 1px solid var(--white-faint);
+  .btn-danger {
+    background: #fff1f1;
+    border-color: #f1c7c7;
+    color: var(--danger);
   }
 
-  .btn-disabled {
-    background: var(--white-faint);
-    color: rgba(240,242,248,0.25);
-    cursor: not-allowed;
-    pointer-events: none;
+  .btn-small {
+    min-height: 2rem;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.82rem;
   }
 
-  /* ── EMPTY ── */
+  .btn-icon {
+    width: 2.35rem;
+    padding-inline: 0;
+  }
+
+  .table-shell {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .table-scroll {
+    overflow: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+  }
+
+  th, td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.78rem 0.85rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #fbfcfd;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    position: sticky;
+    top: 73px;
+    z-index: 5;
+  }
+
+  tbody tr:hover {
+    background: #f9fbfb;
+  }
+
+  .restaurant-name {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 750;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .score {
+    width: 3rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    font-weight: 800;
+  }
+
+  .score-hot { color: var(--danger); background: #fff1f1; }
+  .score-high { color: var(--warning); background: #fff4e8; }
+  .score-good { color: var(--good); background: #edf8f1; }
+  .score-low { color: var(--low); background: #f0f2ff; }
+
+  .badge {
+    display: inline-flex;
+    max-width: 220px;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.24rem 0.6rem;
+    font-size: 0.76rem;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .badge::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+  }
+
+  .badge-hot { color: var(--danger); background: #fff1f1; }
+  .badge-high { color: var(--warning); background: #fff4e8; }
+  .badge-online { color: var(--good); background: #edf8f1; }
+  .badge-low { color: var(--low); background: #f0f2ff; }
+  .badge-neutral { color: #5b6773; background: #eef2f4; }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .page-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .notice {
+    display: none;
+    border: 1px solid #f0c8c8;
+    background: #fff5f5;
+    color: #8a2e2e;
+    border-radius: 8px;
+    padding: 0.8rem 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .notice.show {
+    display: block;
+  }
+
   .empty {
-    grid-column: 1/-1;
     text-align: center;
-    padding: 4rem;
-    color: var(--white-dim);
-    font-size: 0.95rem;
+    color: var(--muted);
+    padding: 3rem 1rem;
   }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    .stats-bar { grid-template-columns: repeat(2, 1fr); }
-    .grid { padding: 1rem; }
-    .controls { padding: 1rem; }
-    .stat-cell { padding: 1rem; }
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(23, 33, 43, 0.48);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    z-index: 50;
   }
 
-  @media (max-width: 480px) {
-    .stats-bar { grid-template-columns: repeat(2, 1fr); }
-    header { padding: 0 1rem; }
+  .modal[hidden] {
+    display: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .logo-dot { animation: none; }
-    .card { transition: none; }
+  .dialog {
+    width: min(720px, 100%);
+    max-height: min(760px, calc(100vh - 2rem));
+    overflow: auto;
+    background: var(--surface);
+    border-radius: 10px;
+    box-shadow: 0 24px 70px rgba(23, 33, 43, 0.26);
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--line);
+    padding: 1rem;
+  }
+
+  .dialog-header h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .dialog-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .dialog-body .wide {
+    grid-column: 1 / -1;
+  }
+
+  .check-row {
+    min-height: 2.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .check-row input {
+    width: 1rem;
+    min-height: 1rem;
+  }
+
+  .dialog-footer {
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 1rem;
+  }
+
+  @media (max-width: 940px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .toolbar { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 620px) {
+    .app-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .header-actions {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .header-actions .btn {
+      flex: 1;
+    }
+
+    main {
+      padding: 0.85rem;
+    }
+
+    .stats, .toolbar, .dialog-body {
+      grid-template-columns: 1fr;
+    }
+
+    .dialog-body .wide {
+      grid-column: auto;
+    }
+
+    .pagination {
+      align-items: flex-start;
+      flex-direction: column;
+    }
   }
 </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">
-    <div class="logo-dot"></div>
-    LeadScope — Restaurant Outreach
+<header class="app-header">
+  <div class="brand">
+    <h1>Restaurant Leads</h1>
+    <p id="headerMeta">Loading leads from MySQL</p>
   </div>
-  <div class="header-meta">Indore / Bhopal Region · 87 Leads</div>
+  <div class="header-actions">
+    <button class="btn" id="refreshBtn" type="button" title="Reload data">Refresh</button>
+    <button class="btn btn-primary" id="addBtn" type="button">Add Lead</button>
+  </div>
 </header>
 
-<div class="stats-bar">
-  <div class="stat-cell">
-    <div class="stat-number total" id="stat-total">87</div>
-    <div class="stat-label">Total Leads</div>
-  </div>
-  <div class="stat-cell">
-    <div class="stat-number hot" id="stat-hot">—</div>
-    <div class="stat-label">🔥 Hot Leads</div>
-  </div>
-  <div class="stat-cell">
-    <div class="stat-number high" id="stat-high">—</div>
-    <div class="stat-label">⬆ High Priority</div>
-  </div>
-  <div class="stat-cell">
-    <div class="stat-number online" id="stat-online">—</div>
-    <div class="stat-label">🌐 Has Website</div>
-  </div>
-</div>
+<main>
+  <section class="stats" aria-label="Lead statistics">
+    <div class="stat">
+      <span class="stat-value" id="statTotal">0</span>
+      <span class="stat-label">Total Leads</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statHot">0</span>
+      <span class="stat-label">Hot Leads</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statHigh">0</span>
+      <span class="stat-label">High Priority</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statWebsite">0</span>
+      <span class="stat-label">With Website</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statPhone">0</span>
+      <span class="stat-label">With Phone</span>
+    </div>
+  </section>
 
-<div class="controls">
-  <div class="search-wrap">
-    <svg class="search-icon" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-    </svg>
-    <input type="search" id="search" placeholder="Search restaurants…">
-  </div>
+  <section class="toolbar" aria-label="Lead controls">
+    <div class="control">
+      <label for="searchInput">Search</label>
+      <input id="searchInput" type="search" placeholder="Restaurant, phone, website">
+    </div>
+    <div class="control">
+      <label for="categoryFilter">Category</label>
+      <select id="categoryFilter"></select>
+    </div>
+    <div class="control">
+      <label for="sortSelect">Sort</label>
+      <select id="sortSelect">
+        <option value="score-desc">Score high to low</option>
+        <option value="score-asc">Score low to high</option>
+        <option value="name-asc">Name A to Z</option>
+        <option value="name-desc">Name Z to A</option>
+        <option value="category-asc">Category A to Z</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="pageSize">Rows</label>
+      <select id="pageSize">
+        <option value="25">25 per page</option>
+        <option value="50">50 per page</option>
+        <option value="100">100 per page</option>
+      </select>
+    </div>
+  </section>
 
-  <div class="filter-tabs" id="filter-tabs">
-    <button class="filter-tab active" data-filter="All">All</button>
-    <button class="filter-tab" data-filter="Hot Lead">🔥 Hot Lead</button>
-    <button class="filter-tab" data-filter="High Priority">⬆ High Priority</button>
-    <button class="filter-tab" data-filter="Strong Online Presence">🌐 Online Presence</button>
-    <button class="filter-tab" data-filter="Low Priority">Low Priority</button>
-  </div>
+  <div class="notice" id="errorBox"></div>
 
-  <select class="sort-select" id="sort">
-    <option value="score-desc">Score: High → Low</option>
-    <option value="score-asc">Score: Low → High</option>
-    <option value="name-asc">Name A → Z</option>
-    <option value="name-desc">Name Z → A</option>
-  </select>
-
-  <div class="results-count" id="results-count"></div>
-</div>
-
-<div class="grid" id="grid"></div>
-
-<script>
-const RAW = [
-  {name:"Jain Mithai Bhandar(JMB)",url:"",hasWeb:false,score:70,cat:"High Priority",phone:""},
-  {name:"Apna Sweets",url:"https://apnasweets.com/",hasWeb:true,score:15,cat:"Strong Online Presence",phone:"7611106942"},
-  {name:"Bhojanalay and Tiffin Centre",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9039106870"},
-  {name:"MY Kitchen Restaurant",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9179171921"},
-  {name:"hazi samosa center",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7489538723"},
-  {name:"Mr. Singh's Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9752091717"},
-  {name:"Nafees",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"9039090005"},
-  {name:"Saifee Restaurant",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9826517285"},
-  {name:"Saifee Hotel",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"9826517285"},
-  {name:"Mr. Beans",url:"https://mrbeans.in/indore.php",hasWeb:true,score:15,cat:"Strong Online Presence",phone:""},
-  {name:"Kebabsville",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"7389939362"},
-  {name:"Blue Lagoon",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"3544208800"},
-  {name:"Mediterra",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
-  {name:"Chopstick City",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"7389910992"},
-  {name:"Sanchi",url:"http://www.sanchiindore.com/",hasWeb:true,score:10,cat:"Strong Online Presence",phone:""},
-  {name:"babla chicken centre",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
-  {name:"Prashant Restaurant",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"7909403003"},
-  {name:"Sai prasad",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"8827443737"},
-  {name:"Neelkamal restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"7510101064"},
-  {name:"Neelkanth restaurant",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9111118858"},
-  {name:"Man bhavan",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9713989888"},
-  {name:"Kabeer roasted chicken",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
-  {name:"Krishna Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9981707374"},
-  {name:"Pitchers Cafebar",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9981118194"},
-  {name:"Pizza Hut",url:"https://restaurants.pizzahut.co.in/Madhya+Pradesh-Indore",hasWeb:true,score:20,cat:"Strong Online Presence",phone:"8655616001"},
-  {name:"Pizza Hut",url:"https://www.pizzahut.co.in/",hasWeb:true,score:15,cat:"Strong Online Presence",phone:"8655616001"},
-  {name:"Pizza Hut",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"8655616001"},
-  {name:"Pizza Hut",url:"https://restaurants.pizzahut.co.in/pizza-hut-bhawarkua-main-rd-pizza-restaurant-bhawarkua-main-rd-indore-104907/Home",hasWeb:true,score:10,cat:"Strong Online Presence",phone:"8655616001"},
-  {name:"Ambika sweets",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9826025001"},
-  {name:"Jainam food",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9399488280"},
-  {name:"Sharma Sweets",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9826235000"},
-  {name:"ATKT cafe",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7566865221"},
-  {name:"Lord of Grill",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:""},
-  {name:"Apna Punjabi Dhaba",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"8720038600"},
-  {name:"Maratha Darbar",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"919907E+11"},
-  {name:"Maayra Ka Dhaaba",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9826069654"},
-  {name:"Ramesh South Indian",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"8982967755"},
-  {name:"Panna Restaurant & Sweets",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"9329074123"},
-  {name:"D. K. Restaurant",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:""},
-  {name:"Kushwah Ji Tiffin Center",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9993631094"},
-  {name:"Kesarlal",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9926001113"},
-  {name:"Pishori Dhaba",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9303264461"},
-  {name:"Gurjar Restaurant",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"8602533302"},
-  {name:"Taste N Best",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"7240893435"},
-  {name:"Sapna Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"7890008232"},
-  {name:"Wayfare",url:"",hasWeb:false,score:80,cat:"High Priority",phone:""},
-  {name:"Satkar Pure Veg",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9479313713"},
-  {name:"Kitchen Sensation",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
-  {name:"Just Paratha",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9074282233"},
-  {name:"Radha sanchi parler",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
-  {name:"Primus Lounge",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:""},
-  {name:"Annapurna Restaurent",url:"",hasWeb:false,score:70,cat:"High Priority",phone:""},
-  {name:"vijayshree sandwhcih",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"7314977939"},
-  {name:"ridhi sidhi",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
-  {name:"Pind balluchi",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"8889688850"},
-  {name:"Satkar Pure Veg Punjabi Dhaba",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"9479313713"},
-  {name:"sun food restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"9755547070"},
-  {name:"Orion Restaurant",url:"",hasWeb:false,score:70,cat:"High Priority",phone:"8109612326"},
-  {name:"Mayur Dhaba",url:"",hasWeb:false,score:80,cat:"High Priority",phone:"6264936977"},
-  {name:"Shri Gajanand Bhojanalaya",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"9009841224"},
-  {name:"Karnavat",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9109228837"},
-  {name:"Desi Tadka Restaurant",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9893979206"},
-  {name:"Mid Flight",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7415861386"},
-  {name:"Mausa",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"8588099345"},
-  {name:"The Garden",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9893507538"},
-  {name:"Wolf Casa",url:"https://www.wolf-casa.com/",hasWeb:true,score:25,cat:"Low Priority",phone:"9893522569"},
-  {name:"Hotel Apna Avenue",url:"https://www.hotelapnaavenue.com/",hasWeb:true,score:20,cat:"Strong Online Presence",phone:"9425086471"},
-  {name:"Jash Garden Restaurant",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9584533335"},
-  {name:"Eden Garden",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
-  {name:"Vrindavan Restaurant",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
-  {name:"Desi Tadka",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9893979206"},
-  {name:"Rangoon Garden",url:"",hasWeb:false,score:80,cat:"High Priority",phone:""},
-  {name:"Hunger Pangzzz",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
-  {name:"JAM",url:"https://jamgate.in/",hasWeb:true,score:25,cat:"Low Priority",phone:""},
-  {name:"hul adda",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:""},
-  {name:"Canteen",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"7697890958"},
-  {name:"Veg Bites Cafe & Restaurant",url:"",hasWeb:false,score:85,cat:"Hot Lead",phone:"7314910263"},
-  {name:"Nature's Kitchen Pluck & Dine",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"9406802629"},
-  {name:"Apna Sweets",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"7611106942"},
-  {name:"jay ambe sweets",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"9009101313"},
-  {name:"DZire paying guest and mess",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:""},
-  {name:"Matargasti",url:"",hasWeb:false,score:75,cat:"High Priority",phone:""},
-  {name:'Vairagi Chef "Cakes and Street Food"',url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"7312400344"},
-  {name:"Royal Bakery Stores",url:"",hasWeb:false,score:95,cat:"Hot Lead",phone:"9174851402"},
-  {name:"Karnawat hotel",url:"",hasWeb:false,score:90,cat:"Hot Lead",phone:"8085954486"},
-  {name:"Rajesh Restuarant",url:"",hasWeb:false,score:75,cat:"High Priority",phone:"9098806125"},
-];
-
-// compute stats
-const statHot = RAW.filter(r => r.cat === "Hot Lead").length;
-const statHigh = RAW.filter(r => r.cat === "High Priority").length;
-const statOnline = RAW.filter(r => r.hasWeb).length;
-document.getElementById('stat-hot').textContent = statHot;
-document.getElementById('stat-high').textContent = statHigh;
-document.getElementById('stat-online').textContent = statOnline;
-document.getElementById('stat-total').textContent = RAW.length;
-
-const RING_R = 20, RING_CIRC = 2 * Math.PI * RING_R;
-
-function ringColor(score) {
-  if (score >= 90) return '#FF4757';
-  if (score >= 75) return '#FF6B35';
-  if (score >= 50) return '#F5A623';
-  return '#748FFC';
-}
-
-function badgeClass(cat) {
-  if (cat === 'Hot Lead') return 'badge-hot';
-  if (cat === 'High Priority') return 'badge-high';
-  if (cat === 'Strong Online Presence') return 'badge-online';
-  return 'badge-low';
-}
-
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function buildCard(r) {
-  const pct = r.score / 100;
-  const dash = RING_CIRC * pct;
-  const gap = RING_CIRC - dash;
-  const color = ringColor(r.score);
-
-  const phoneHtml = r.phone
-    ? `<div class="info-row"><svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg><span><span class="info-value"><a href="tel:${r.phone}">${r.phone}</a></span></span></div>`
-    : `<div class="info-row"><svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg><span style="color:rgba(240,242,248,0.3);font-size:0.78rem">No phone found</span></div>`;
-
-  const webHtml = r.hasWeb && r.url
-    ? `<div class="info-row"><svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg><span class="info-value"><a href="${r.url}" target="_blank" rel="noopener">Website ↗</a></span></div>`
-    : '';
-
-  const callBtn = r.phone
-    ? `<a href="tel:${r.phone}" class="btn btn-primary">📞 Call</a>`
-    : `<span class="btn btn-disabled">📞 No Phone</span>`;
-
-  const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(r.name + ' restaurant')}`;
-
-  return `<div class="card" data-cat="${r.cat}">
-    <div class="card-head">
-      <div class="card-name">${r.name}</div>
-      <div class="score-ring" title="Lead Score: ${r.score}">
-        <svg width="52" height="52" viewBox="0 0 52 52">
-          <circle class="score-ring-track" cx="26" cy="26" r="${RING_R}"/>
-          <circle class="score-ring-fill" cx="26" cy="26" r="${RING_R}"
-            stroke="${color}"
-            stroke-dasharray="${dash} ${gap}"/>
-        </svg>
-        <div class="score-ring-label" style="color:${color}">${r.score}</div>
+  <section class="table-shell" aria-label="Restaurant lead table">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Restaurant</th>
+            <th>Score</th>
+            <th>Category</th>
+            <th>Phone</th>
+            <th>Website</th>
+            <th>Status</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leadRows">
+          <tr><td colspan="7" class="empty">Loading leads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div id="resultMeta">0 results</div>
+      <div class="page-actions">
+        <button class="btn btn-small" id="prevPage" type="button">Previous</button>
+        <span id="pageMeta">Page 1</span>
+        <button class="btn btn-small" id="nextPage" type="button">Next</button>
       </div>
     </div>
-    <div class="badge ${badgeClass(r.cat)}">
-      <div class="badge-dot"></div>${r.cat}
+  </section>
+</main>
+
+<div class="modal" id="leadModal" hidden>
+  <form class="dialog" id="leadForm">
+    <div class="dialog-header">
+      <h2 id="modalTitle">Add Lead</h2>
+      <button class="btn btn-icon" id="closeModal" type="button" title="Close">X</button>
     </div>
-    <div class="card-info">
-      ${phoneHtml}
-      ${webHtml}
+    <div class="dialog-body">
+      <input type="hidden" id="leadId">
+
+      <div class="control wide">
+        <label for="leadName">Restaurant Name</label>
+        <input id="leadName" required maxlength="255">
+      </div>
+
+      <div class="control">
+        <label for="leadScore">Lead Score</label>
+        <input id="leadScore" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div class="control">
+        <label for="leadCategory">Lead Category</label>
+        <input id="leadCategory" list="categoryOptions" maxlength="120">
+        <datalist id="categoryOptions"></datalist>
+      </div>
+
+      <div class="control">
+        <label for="leadPhone">Phone</label>
+        <input id="leadPhone" inputmode="tel" maxlength="80">
+      </div>
+
+      <div class="control">
+        <label for="leadStatus">Scrape Status</label>
+        <input id="leadStatus" maxlength="80">
+      </div>
+
+      <div class="control wide">
+        <label for="leadUrl">Official Website</label>
+        <input id="leadUrl" type="url" maxlength="500">
+      </div>
+
+      <div class="control wide">
+        <label for="leadSearchUrl">Google Search URL</label>
+        <input id="leadSearchUrl" type="url" maxlength="500">
+      </div>
+
+      <div class="check-row wide">
+        <input id="leadHasWebsite" type="checkbox">
+        <label for="leadHasWebsite">Has official website</label>
+      </div>
     </div>
-    <div class="card-footer">
-      ${callBtn}
-      <a href="${searchUrl}" target="_blank" rel="noopener" class="btn btn-ghost">🔍 Search</a>
+    <div class="dialog-footer">
+      <button class="btn" type="button" id="cancelModal">Cancel</button>
+      <button class="btn btn-primary" type="submit" id="saveLead">Save Lead</button>
     </div>
-  </div>`;
+  </form>
+</div>
+
+<script>
+const API_URL = "/api/leads";
+const DEFAULT_CATEGORIES = [
+  "Hot Lead",
+  "High Priority",
+  "Strong Online Presence",
+  "Low Priority"
+];
+
+const state = {
+  leads: [],
+  search: "",
+  category: "All",
+  sort: "score-desc",
+  page: 1,
+  pageSize: 25,
+  loading: false
+};
+
+const el = {
+  headerMeta: document.getElementById("headerMeta"),
+  errorBox: document.getElementById("errorBox"),
+  leadRows: document.getElementById("leadRows"),
+  searchInput: document.getElementById("searchInput"),
+  categoryFilter: document.getElementById("categoryFilter"),
+  sortSelect: document.getElementById("sortSelect"),
+  pageSize: document.getElementById("pageSize"),
+  resultMeta: document.getElementById("resultMeta"),
+  pageMeta: document.getElementById("pageMeta"),
+  prevPage: document.getElementById("prevPage"),
+  nextPage: document.getElementById("nextPage"),
+  statTotal: document.getElementById("statTotal"),
+  statHot: document.getElementById("statHot"),
+  statHigh: document.getElementById("statHigh"),
+  statWebsite: document.getElementById("statWebsite"),
+  statPhone: document.getElementById("statPhone"),
+  modal: document.getElementById("leadModal"),
+  modalTitle: document.getElementById("modalTitle"),
+  form: document.getElementById("leadForm"),
+  leadId: document.getElementById("leadId"),
+  leadName: document.getElementById("leadName"),
+  leadScore: document.getElementById("leadScore"),
+  leadCategory: document.getElementById("leadCategory"),
+  categoryOptions: document.getElementById("categoryOptions"),
+  leadPhone: document.getElementById("leadPhone"),
+  leadStatus: document.getElementById("leadStatus"),
+  leadUrl: document.getElementById("leadUrl"),
+  leadSearchUrl: document.getElementById("leadSearchUrl"),
+  leadHasWebsite: document.getElementById("leadHasWebsite")
+};
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[char]));
 }
 
-let currentFilter = 'All';
-let currentSearch = '';
-let currentSort = 'score-desc';
-
-function render() {
-  let data = [...RAW];
-
-  if (currentFilter !== 'All') {
-    data = data.filter(r => r.cat === currentFilter);
-  }
-
-  if (currentSearch) {
-    const q = currentSearch.toLowerCase();
-    data = data.filter(r =>
-      r.name.toLowerCase().includes(q) ||
-      r.phone.includes(q)
-    );
-  }
-
-  data.sort((a, b) => {
-    switch(currentSort) {
-      case 'score-desc': return b.score - a.score;
-      case 'score-asc': return a.score - b.score;
-      case 'name-asc': return a.name.localeCompare(b.name);
-      case 'name-desc': return b.name.localeCompare(a.name);
-    }
-  });
-
-  const grid = document.getElementById('grid');
-  document.getElementById('results-count').textContent = `${data.length} result${data.length !== 1 ? 's' : ''}`;
-
-  if (data.length === 0) {
-    grid.innerHTML = `<div class="empty">No leads match your filters. Try broadening your search.</div>`;
-    return;
-  }
-
-  grid.innerHTML = data.map(buildCard).join('');
+function safeUrl(value) {
+  const url = String(value || "").trim();
+  return /^https?:\/\//i.test(url) ? url : "";
 }
 
-// filter tabs
-document.getElementById('filter-tabs').addEventListener('click', e => {
-  const btn = e.target.closest('.filter-tab');
-  if (!btn) return;
-  currentFilter = btn.dataset.filter;
-  document.querySelectorAll('.filter-tab').forEach(b => {
-    b.className = 'filter-tab';
-    if (b === btn) {
-      const cat = b.dataset.filter;
-      if (cat === 'All') b.classList.add('active');
-      else if (cat === 'Hot Lead') b.classList.add('active-hot');
-      else if (cat === 'High Priority') b.classList.add('active');
-      else if (cat === 'Strong Online Presence') b.classList.add('active-online');
-      else b.classList.add('active-low');
-    }
+function phoneHref(value) {
+  const phone = String(value || "").trim();
+  const cleaned = phone.replace(/[^\d+]/g, "");
+  return cleaned ? "tel:" + cleaned : "";
+}
+
+function hasPhone(lead) {
+  return Boolean(String(lead.extracted_phone || "").trim());
+}
+
+function hasWebsite(lead) {
+  return Boolean(lead.has_official_website || safeUrl(lead.official_url));
+}
+
+function scoreClass(score) {
+  if (score >= 90) return "score-hot";
+  if (score >= 70) return "score-high";
+  if (score >= 30) return "score-good";
+  return "score-low";
+}
+
+function badgeClass(category) {
+  const value = String(category || "").toLowerCase();
+  if (value.includes("hot")) return "badge-hot";
+  if (value.includes("high")) return "badge-high";
+  if (value.includes("online") || value.includes("website")) return "badge-online";
+  if (value.includes("low")) return "badge-low";
+  return "badge-neutral";
+}
+
+function showError(message) {
+  el.errorBox.textContent = message || "";
+  el.errorBox.classList.toggle("show", Boolean(message));
+}
+
+async function requestJson(url, options = {}) {
+  const response = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...options
   });
-  render();
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(body.error || "The server could not complete the request.");
+  }
+
+  return body;
+}
+
+async function loadLeads() {
+  state.loading = true;
+  showError("");
+  el.headerMeta.textContent = "Loading leads from MySQL";
+
+  try {
+    const data = await requestJson(API_URL);
+    state.leads = Array.isArray(data.leads) ? data.leads : [];
+    state.page = 1;
+    renderAll();
+    el.headerMeta.textContent = "Connected to MySQL table: restaurant_leads_with_phone";
+  } catch (error) {
+    showError(error.message);
+    el.headerMeta.textContent = "Could not load leads";
+    el.leadRows.innerHTML = '<tr><td colspan="7" class="empty">No server data available.</td></tr>';
+  } finally {
+    state.loading = false;
+  }
+}
+
+function categories() {
+  const fromData = state.leads
+    .map(lead => String(lead.lead_category || "").trim())
+    .filter(Boolean);
+  return [...new Set([...DEFAULT_CATEGORIES, ...fromData])];
+}
+
+function renderCategories() {
+  const selected = state.category;
+  const options = ["All", ...categories()];
+  el.categoryFilter.innerHTML = options
+    .map(category => '<option value="' + escapeHtml(category) + '">' + escapeHtml(category) + '</option>')
+    .join("");
+  el.categoryFilter.value = options.includes(selected) ? selected : "All";
+
+  el.categoryOptions.innerHTML = categories()
+    .map(category => '<option value="' + escapeHtml(category) + '"></option>')
+    .join("");
+}
+
+function filteredLeads() {
+  const query = state.search.trim().toLowerCase();
+  let leads = [...state.leads];
+
+  if (state.category !== "All") {
+    leads = leads.filter(lead => String(lead.lead_category || "") === state.category);
+  }
+
+  if (query) {
+    leads = leads.filter(lead => [
+      lead.name,
+      lead.extracted_phone,
+      lead.official_url,
+      lead.lead_category,
+      lead.scrape_status
+    ].some(value => String(value || "").toLowerCase().includes(query)));
+  }
+
+  leads.sort((a, b) => {
+    const scoreA = Number(a.lead_score || 0);
+    const scoreB = Number(b.lead_score || 0);
+    const nameA = String(a.name || "");
+    const nameB = String(b.name || "");
+    const catA = String(a.lead_category || "");
+    const catB = String(b.lead_category || "");
+
+    if (state.sort === "score-asc") return scoreA - scoreB;
+    if (state.sort === "name-asc") return nameA.localeCompare(nameB);
+    if (state.sort === "name-desc") return nameB.localeCompare(nameA);
+    if (state.sort === "category-asc") return catA.localeCompare(catB);
+    return scoreB - scoreA;
+  });
+
+  return leads;
+}
+
+function renderStats() {
+  el.statTotal.textContent = state.leads.length;
+  el.statHot.textContent = state.leads.filter(lead => String(lead.lead_category || "").toLowerCase().includes("hot")).length;
+  el.statHigh.textContent = state.leads.filter(lead => String(lead.lead_category || "").toLowerCase().includes("high")).length;
+  el.statWebsite.textContent = state.leads.filter(hasWebsite).length;
+  el.statPhone.textContent = state.leads.filter(hasPhone).length;
+}
+
+function renderRows() {
+  const leads = filteredLeads();
+  const totalPages = Math.max(1, Math.ceil(leads.length / state.pageSize));
+  state.page = Math.min(state.page, totalPages);
+  const start = (state.page - 1) * state.pageSize;
+  const pageRows = leads.slice(start, start + state.pageSize);
+
+  if (!pageRows.length) {
+    el.leadRows.innerHTML = '<tr><td colspan="7" class="empty">No leads match the current filters.</td></tr>';
+  } else {
+    el.leadRows.innerHTML = pageRows.map(lead => {
+      const score = Number(lead.lead_score || 0);
+      const category = lead.lead_category || "Uncategorized";
+      const phone = String(lead.extracted_phone || "").trim();
+      const phoneLink = phoneHref(phone);
+      const website = safeUrl(lead.official_url);
+      const searchUrl = safeUrl(lead.google_search_url) || "https://www.google.com/search?q=" + encodeURIComponent((lead.name || "") + " restaurant");
+
+      return '<tr>' +
+        '<td><div class="restaurant-name" title="' + escapeHtml(lead.name) + '">' + escapeHtml(lead.name || "Unnamed lead") + '</div></td>' +
+        '<td><span class="score ' + scoreClass(score) + '">' + escapeHtml(score) + '</span></td>' +
+        '<td><span class="badge ' + badgeClass(category) + '">' + escapeHtml(category) + '</span></td>' +
+        '<td>' + (phoneLink ? '<a href="' + escapeHtml(phoneLink) + '">' + escapeHtml(phone) + '</a>' : '<span class="muted">No phone</span>') + '</td>' +
+        '<td>' + (website ? '<a href="' + escapeHtml(website) + '" target="_blank" rel="noopener">Open website</a>' : '<span class="muted">No website</span>') + '</td>' +
+        '<td><span class="muted">' + escapeHtml(lead.scrape_status || "") + '</span></td>' +
+        '<td><div class="actions">' +
+          '<a class="btn btn-small" href="' + escapeHtml(searchUrl) + '" target="_blank" rel="noopener">Search</a>' +
+          '<button class="btn btn-small" type="button" data-action="edit" data-id="' + escapeHtml(lead._id) + '">Edit</button>' +
+          '<button class="btn btn-small btn-danger" type="button" data-action="delete" data-id="' + escapeHtml(lead._id) + '">Delete</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join("");
+  }
+
+  const shownStart = leads.length ? start + 1 : 0;
+  const shownEnd = Math.min(start + state.pageSize, leads.length);
+  el.resultMeta.textContent = shownStart + "-" + shownEnd + " of " + leads.length + " results";
+  el.pageMeta.textContent = "Page " + state.page + " of " + totalPages;
+  el.prevPage.disabled = state.page <= 1;
+  el.nextPage.disabled = state.page >= totalPages;
+}
+
+function renderAll() {
+  renderStats();
+  renderCategories();
+  renderRows();
+}
+
+function findLead(id) {
+  return state.leads.find(lead => String(lead._id) === String(id));
+}
+
+function openModal(lead = null) {
+  el.form.reset();
+  el.leadId.value = lead?._id || "";
+  el.modalTitle.textContent = lead ? "Edit Lead" : "Add Lead";
+  el.leadName.value = lead?.name || "";
+  el.leadScore.value = lead?.lead_score ?? 0;
+  el.leadCategory.value = lead?.lead_category || "High Priority";
+  el.leadPhone.value = lead?.extracted_phone || "";
+  el.leadStatus.value = lead?.scrape_status || "";
+  el.leadUrl.value = lead?.official_url || "";
+  el.leadSearchUrl.value = lead?.google_search_url || "";
+  el.leadHasWebsite.checked = hasWebsite(lead || {});
+  el.modal.hidden = false;
+  el.leadName.focus();
+}
+
+function closeModal() {
+  el.modal.hidden = true;
+}
+
+function formPayload() {
+  return {
+    name: el.leadName.value,
+    lead_score: el.leadScore.value,
+    lead_category: el.leadCategory.value,
+    extracted_phone: el.leadPhone.value,
+    scrape_status: el.leadStatus.value,
+    official_url: el.leadUrl.value,
+    google_search_url: el.leadSearchUrl.value,
+    has_official_website: el.leadHasWebsite.checked
+  };
+}
+
+async function saveLead(event) {
+  event.preventDefault();
+  const id = el.leadId.value;
+  const method = id ? "PUT" : "POST";
+  const url = id ? API_URL + "/" + encodeURIComponent(id) : API_URL;
+  const saveButton = document.getElementById("saveLead");
+
+  saveButton.disabled = true;
+  showError("");
+
+  try {
+    await requestJson(url, {
+      method,
+      body: JSON.stringify(formPayload())
+    });
+    closeModal();
+    await loadLeads();
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    saveButton.disabled = false;
+  }
+}
+
+async function deleteLead(id) {
+  const lead = findLead(id);
+  if (!lead || !confirm("Delete " + (lead.name || "this lead") + "?")) return;
+
+  showError("");
+
+  try {
+    await requestJson(API_URL + "/" + encodeURIComponent(id), { method: "DELETE" });
+    state.leads = state.leads.filter(item => String(item._id) !== String(id));
+    renderAll();
+  } catch (error) {
+    showError(error.message);
+  }
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadLeads);
+document.getElementById("addBtn").addEventListener("click", () => openModal());
+document.getElementById("closeModal").addEventListener("click", closeModal);
+document.getElementById("cancelModal").addEventListener("click", closeModal);
+el.form.addEventListener("submit", saveLead);
+
+el.modal.addEventListener("click", event => {
+  if (event.target === el.modal) closeModal();
 });
 
-document.getElementById('search').addEventListener('input', e => {
-  currentSearch = e.target.value.trim();
-  render();
+el.searchInput.addEventListener("input", event => {
+  state.search = event.target.value;
+  state.page = 1;
+  renderRows();
 });
 
-document.getElementById('sort').addEventListener('change', e => {
-  currentSort = e.target.value;
-  render();
+el.categoryFilter.addEventListener("change", event => {
+  state.category = event.target.value;
+  state.page = 1;
+  renderRows();
 });
 
-render();
+el.sortSelect.addEventListener("change", event => {
+  state.sort = event.target.value;
+  state.page = 1;
+  renderRows();
+});
+
+el.pageSize.addEventListener("change", event => {
+  state.pageSize = Number(event.target.value);
+  state.page = 1;
+  renderRows();
+});
+
+el.prevPage.addEventListener("click", () => {
+  state.page = Math.max(1, state.page - 1);
+  renderRows();
+});
+
+el.nextPage.addEventListener("click", () => {
+  state.page += 1;
+  renderRows();
+});
+
+el.leadRows.addEventListener("click", event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const id = button.dataset.id;
+  if (button.dataset.action === "edit") openModal(findLead(id));
+  if (button.dataset.action === "delete") deleteLead(id);
+});
+
+loadLeads();
 </script>
 </body>
 </html>
