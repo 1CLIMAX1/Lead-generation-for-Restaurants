@@ -1,3 +1,5 @@
-flask
-flask-mysqldb
+Flask
 flask-cors
+flask-mysqldb
+gunicorn
+mysqlclient
