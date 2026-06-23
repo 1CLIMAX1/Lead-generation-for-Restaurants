@@ -7,7 +7,7 @@ import os
 
 from flask_cors import CORS          # ← add this import
 
-app = Flask(__name__, template_folder=".")
+app = Flask(__name__, template_folder="templates")
 CORS(app, origins=["https://leadgenerati.netlify.app/"])  # ← add this
 
 
