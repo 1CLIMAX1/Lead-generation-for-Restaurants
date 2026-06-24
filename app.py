@@ -17,8 +17,8 @@ app.config["MYSQL_HOST"]     = os.environ.get("MYSQL_HOST", "localhost")
 app.config["MYSQL_USER"]     = os.environ.get("MYSQL_USER", "root")
 app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD", "@Urlosing12")
 app.config["MYSQL_DB"]       = os.environ.get("MYSQL_DB", "lead_generation")
-
-app.config["MYSQL_SSL_MODE"] = "VERIFY_IDENTITY"
+app.config["MYSQL_PORT"] = 4000
+app.config["MYSQL_SSL"] = {"ssl": {}}
 
 
 
