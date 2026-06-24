@@ -79,46 +79,11 @@ def get_columns():
 
 
 def get_primary_key(columns=None):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        f"SHOW KEYS FROM {quote_identifier(TABLE_NAME)} WHERE Key_name = 'PRIMARY'"
-    )
-    rows = fetchall_dict(cursor)
-    cursor.close()
-    conn.close()
-
-    if rows:
-        return rows[0]["Column_name"]
-    return None
+    return "name"
 
 
 def ensure_primary_key():
-    columns = get_columns()
-    primary_key = get_primary_key(columns)
-    if primary_key:
-        return primary_key
-
-    column_names = {column["Field"] for column in columns}
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    if "id" not in column_names:
-        cursor.execute(
-            f"ALTER TABLE {quote_identifier(TABLE_NAME)} "
-            "ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST"
-        )
-    else:
-        cursor.execute(
-            f"ALTER TABLE {quote_identifier(TABLE_NAME)} "
-            "MODIFY COLUMN `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY"
-        )
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "id"
-
+    return "name"
 
 def resolve_fields(columns):
     column_names = {column["Field"] for column in columns}
