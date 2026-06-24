@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from flask import Flask, jsonify, render_template, request
-from flask_mysqldb import MySQL
+import pymysql
 import os
 
 from flask_cors import CORS          # ← add this import
@@ -13,16 +13,17 @@ CORS(app, origins=["https://leadgenerati.netlify.app/"])  # ← add this
 
 
 # MySQL connection details
-app.config["MYSQL_HOST"]     = os.environ.get("MYSQL_HOST", "localhost")
-app.config["MYSQL_USER"]     = os.environ.get("MYSQL_USER", "root")
-app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD", "@Urlosing12")
-app.config["MYSQL_DB"]       = os.environ.get("MYSQL_DB", "lead_generation")
-app.config["MYSQL_PORT"] = 4000
-app.config["MYSQL_SSL"] = {"ssl": {}}
-
-
-
-mysql = MySQL(app)
+def get_connection():
+    return pymysql.connect(
+        host=os.environ["MYSQL_HOST"],
+        port=int(os.environ.get("MYSQL_PORT", 4000)),
+        user=os.environ["MYSQL_USER"],
+        password=os.environ["MYSQL_PASSWORD"],
+        database=os.environ["MYSQL_DB"],
+        cursorclass=pymysql.cursors.DictCursor,
+        ssl_verify_cert=True,
+        ssl_verify_identity=True
+    )
 
 TABLE_NAME = "restaurant_leads_with_phone"
 
@@ -54,8 +55,7 @@ def quote_identifier(identifier):
 
 
 def fetchall_dict(cursor):
-    columns = [column[0] for column in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return cursor.fetchall()
 
 
 def json_value(value):
@@ -69,20 +69,24 @@ def json_value(value):
 
 
 def get_columns():
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(f"SHOW COLUMNS FROM {quote_identifier(TABLE_NAME)}")
     rows = fetchall_dict(cursor)
     cursor.close()
+    conn.close()
     return rows
 
 
 def get_primary_key(columns=None):
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(
         f"SHOW KEYS FROM {quote_identifier(TABLE_NAME)} WHERE Key_name = 'PRIMARY'"
     )
     rows = fetchall_dict(cursor)
     cursor.close()
+    conn.close()
 
     if rows:
         return rows[0]["Column_name"]
@@ -96,7 +100,8 @@ def ensure_primary_key():
         return primary_key
 
     column_names = {column["Field"] for column in columns}
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
 
     if "id" not in column_names:
         cursor.execute(
@@ -109,8 +114,9 @@ def ensure_primary_key():
             "MODIFY COLUMN `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY"
         )
 
-    mysql.connection.commit()
+    conn.commit()
     cursor.close()
+    conn.close()
     return "id"
 
 
@@ -178,7 +184,8 @@ def normalize_lead(row, primary_key, field_map):
 
 
 def get_lead(primary_key, lead_id, field_map):
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(
         f"SELECT * FROM {quote_identifier(TABLE_NAME)} "
         f"WHERE {quote_identifier(primary_key)} = %s",
@@ -186,6 +193,7 @@ def get_lead(primary_key, lead_id, field_map):
     )
     rows = fetchall_dict(cursor)
     cursor.close()
+    conn.close()
     return normalize_lead(rows[0], primary_key, field_map) if rows else None
 
 
@@ -201,10 +209,12 @@ def list_leads():
     columns = get_columns()
     field_map = resolve_fields(columns)
 
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM {quote_identifier(TABLE_NAME)}")
     rows = fetchall_dict(cursor)
     cursor.close()
+    conn.close()
 
     leads = [normalize_lead(row, primary_key, field_map) for row in rows]
 
@@ -232,15 +242,17 @@ def create_lead():
     column_sql = ", ".join(quote_identifier(column) for column in values)
     placeholder_sql = ", ".join(["%s"] * len(values))
 
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(
         f"INSERT INTO {quote_identifier(TABLE_NAME)} ({column_sql}) "
         f"VALUES ({placeholder_sql})",
         tuple(values.values()),
     )
-    mysql.connection.commit()
+    conn.commit()
     lead_id = cursor.lastrowid
     cursor.close()
+    conn.close()
 
     lead = get_lead(primary_key, lead_id, field_map)
     return jsonify({"lead": lead}), 201
@@ -259,15 +271,17 @@ def update_lead(lead_id):
 
     set_sql = ", ".join(f"{quote_identifier(column)} = %s" for column in values)
 
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(
         f"UPDATE {quote_identifier(TABLE_NAME)} SET {set_sql} "
         f"WHERE {quote_identifier(primary_key)} = %s",
         (*values.values(), lead_id),
     )
-    mysql.connection.commit()
+    conn.commit()
     affected = cursor.rowcount
     cursor.close()
+    conn.close()
 
     if not affected:
         return jsonify({"error": "Lead not found."}), 404
@@ -279,21 +293,32 @@ def update_lead(lead_id):
 def delete_lead(lead_id):
     primary_key = ensure_primary_key()
 
-    cursor = mysql.connection.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
     cursor.execute(
         f"DELETE FROM {quote_identifier(TABLE_NAME)} "
         f"WHERE {quote_identifier(primary_key)} = %s",
         (lead_id,),
     )
-    mysql.connection.commit()
+    conn.commit()
     affected = cursor.rowcount
     cursor.close()
+    conn.close()
 
     if not affected:
         return jsonify({"error": "Lead not found."}), 404
 
     return jsonify({"ok": True})
 
+@app.get("/test-db")
+def test_db():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1")
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return jsonify(result)
 
 if __name__ == "__main__":
     import os
