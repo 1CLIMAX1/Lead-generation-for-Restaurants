@@ -25,7 +25,7 @@ def get_connection():
         ssl_verify_identity=True
     )
 
-TABLE_NAME = "restaurant_leads_with_phone"
+TABLE_NAME = "Restaurant_information"
 
 FIELD_ALIASES = {
     "name": ("name", "restaurant_name", "business_name"),
