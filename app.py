@@ -18,6 +18,8 @@ app.config["MYSQL_USER"]     = os.environ.get("MYSQL_USER", "root")
 app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD", "@Urlosing12")
 app.config["MYSQL_DB"]       = os.environ.get("MYSQL_DB", "lead_generation")
 
+app.config["MYSQL_SSL_MODE"] = "VERIFY_IDENTITY"
+
 
 
 mysql = MySQL(app)
