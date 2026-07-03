@@ -459,6 +459,10 @@
   </div>
   <div class="header-actions">
     <button class="btn" id="refreshBtn" type="button" title="Reload data">Refresh</button>
+    <div style="display:inline-flex;gap:.4rem">
+    <button class="btn" id="exportCsvBtn" type="button">Export CSV</button>
+    <button class="btn" id="exportExcelBtn" type="button">Export Excel</button>
+    </div>
     <button class="btn btn-primary" id="addBtn" type="button">Add Lead</button>
   </div>
 </header>
@@ -495,6 +499,10 @@
     <div class="control">
       <label for="categoryFilter">Category</label>
       <select id="categoryFilter"></select>
+    </div>
+    <div class="control">
+      <label for="locationFilter">Location</label>
+      <select id="locationFilter"><option>All Locations</option></select>
     </div>
     <div class="control">
       <label for="sortSelect">Sort</label>
@@ -906,7 +914,21 @@ async function saveLead(event) {
       body: JSON.stringify(formPayload())
     });
     closeModal();
-    await loadLeads();
+    await 
+function exportCSV(){
+ const rows=filteredLeads();
+ if(!rows.length)return;
+ const headers=Object.keys(rows[0]);
+ const csv=[headers.join(",")].concat(rows.map(r=>headers.map(h=>`"${String(r[h]??"").replace(/"/g,'""')}"`).join(","))).join("\n");
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+ a.download='restaurant_leads.csv';a.click();
+}
+function exportExcel(){ exportCSV(); alert('Replace with SheetJS (xlsx) for true Excel export.');}
+document.getElementById('exportCsvBtn').onclick=exportCSV;
+document.getElementById('exportExcelBtn').onclick=exportExcel;
+
+loadLeads();
   } catch (error) {
     showError(error.message);
   } finally {
@@ -981,6 +1003,20 @@ el.leadRows.addEventListener("click", event => {
   if (button.dataset.action === "edit") openModal(findLead(id));
   if (button.dataset.action === "delete") deleteLead(id);
 });
+
+
+function exportCSV(){
+ const rows=filteredLeads();
+ if(!rows.length)return;
+ const headers=Object.keys(rows[0]);
+ const csv=[headers.join(",")].concat(rows.map(r=>headers.map(h=>`"${String(r[h]??"").replace(/"/g,'""')}"`).join(","))).join("\n");
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+ a.download='restaurant_leads.csv';a.click();
+}
+function exportExcel(){ exportCSV(); alert('Replace with SheetJS (xlsx) for true Excel export.');}
+document.getElementById('exportCsvBtn').onclick=exportCSV;
+document.getElementById('exportExcelBtn').onclick=exportExcel;
 
 loadLeads();
 </script>
