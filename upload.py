@@ -51,26 +51,47 @@ def clean_value(column, raw):
     return str(raw or "").strip()
 
 
+TABLE_SCHEMA = {
+    "name": "VARCHAR(255) NOT NULL PRIMARY KEY",
+    "official_url": "VARCHAR(500) NOT NULL DEFAULT ''",
+    "has_official_website": "TINYINT(1) NOT NULL DEFAULT 0",
+    "lead_score": "INT NOT NULL DEFAULT 0",
+    "lead_category": "VARCHAR(100) NOT NULL DEFAULT ''",
+    "extracted_phone": "VARCHAR(50) NOT NULL DEFAULT ''",
+    "google_search_url": "VARCHAR(700) NOT NULL DEFAULT ''",
+    "scrape_status": "VARCHAR(255) NOT NULL DEFAULT ''",
+    "lat": "DECIMAL(10, 7) NULL",
+    "lon": "DECIMAL(10, 7) NULL",
+    "email": "VARCHAR(255) NOT NULL DEFAULT ''",
+    "amenity": "VARCHAR(100) NOT NULL DEFAULT ''",
+    "updated_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+}
+
+
 def ensure_table(cursor, table_name):
     cursor.execute(
-        f"""
-        CREATE TABLE IF NOT EXISTS {quote_identifier(table_name)} (
-            name VARCHAR(255) NOT NULL PRIMARY KEY,
-            official_url VARCHAR(500) NOT NULL DEFAULT '',
-            has_official_website TINYINT(1) NOT NULL DEFAULT 0,
-            lead_score INT NOT NULL DEFAULT 0,
-            lead_category VARCHAR(100) NOT NULL DEFAULT '',
-            extracted_phone VARCHAR(50) NOT NULL DEFAULT '',
-            google_search_url VARCHAR(700) NOT NULL DEFAULT '',
-            scrape_status VARCHAR(255) NOT NULL DEFAULT '',
-            lat DECIMAL(10, 7) NULL,
-            lon DECIMAL(10, 7) NULL,
-            email VARCHAR(255) NOT NULL DEFAULT '',
-            amenity VARCHAR(100) NOT NULL DEFAULT '',
-            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
-        """
+        f"SELECT COUNT(*) AS count FROM information_schema.TABLES "
+        f"WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s",
+        (table_name,),
     )
+    if cursor.fetchone()["count"] == 0:
+        columns_sql = ",\n            ".join(
+            f"{quote_identifier(name)} {definition}"
+            for name, definition in TABLE_SCHEMA.items()
+        )
+        cursor.execute(
+            f"CREATE TABLE {quote_identifier(table_name)} (\n            {columns_sql}\n        )"
+        )
+        return
+
+    cursor.execute(f"SHOW COLUMNS FROM {quote_identifier(table_name)}")
+    existing_columns = {row["Field"] for row in cursor.fetchall()}
+    for column, definition in TABLE_SCHEMA.items():
+        if column not in existing_columns:
+            cursor.execute(
+                f"ALTER TABLE {quote_identifier(table_name)} "
+                f"ADD COLUMN {quote_identifier(column)} {definition}"
+            )
 
 
 def upsert_rows(cursor, rows, table_name):

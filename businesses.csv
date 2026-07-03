@@ -1,93 +1,70 @@
-name,website,phone,email,amenity,lat,lon
-Indigo,,,,restaurant,22.7533416,75.903384
-Jain Mithai Bhandar(JMB),,,,restaurant,22.727255,75.8945618
-Apna Sweets,,,,restaurant,22.7257518,75.8920658
-,,,,restaurant,22.7244111,75.8843599
-Bhojanalay and Tiffin Centre,,,,restaurant,22.7554685,75.9049511
-MY Kitchen Restaurant,,,,restaurant,22.7562278,75.9051644
-hazi samosa center,,,,restaurant,22.7190137,75.8593867
-Mr. Singh's Restaurant,,,,restaurant,22.7536052,75.9013727
-Nafees,,,,restaurant,22.7257453,75.8883492
-Saifee Restaurant,,,,restaurant,22.7160939,75.8641447
-Saifee Hotel,,,,restaurant,22.7163833,75.8640405
-Mr. Beans,https://www.mrbeans.in/,+91 731 428 5050,,restaurant,22.7232375,75.896927
-Kebabsville,,,,restaurant,22.7508667,75.8893939
-Blue Lagoon,,,,restaurant,22.7509417,75.8889642
-Mediterra,,,,restaurant,22.7515742,75.8890973
-Chopstick City,,,,restaurant,22.7512405,75.8893495
-Sanchi,,,,restaurant,22.7513794,75.8892539
-babla chicken centre,,,,restaurant,22.7048167,75.844087
-Prashant Restaurant,,,,restaurant,22.7206932,75.9014201
-Sai prasad,,,,restaurant,22.7177775,75.8695959
-Neelkamal restaurant,,,,restaurant,22.7178272,75.8694472
-Neelkanth restaurant,,,,restaurant,22.7177657,75.8698126
-Man bhavan,,,,restaurant,22.7137187,75.8745701
-Kabeer roasted chicken,,,,restaurant,22.7138033,75.8745714
-Krishna Restaurant,,,,restaurant,22.8183481,75.9274068
-Pitchers Cafebar,,,,restaurant,22.7443446,75.8920419
-Pizza Hut,,,,restaurant,22.7004322,75.8680274
-Pizza Hut,,,,restaurant,22.7252554,75.8943212
-Pizza Hut,,,,restaurant,22.7538662,75.897717
-Pizza Hut,,,,restaurant,22.7447525,75.8947744
-Ambika sweets,,,,restaurant,22.7200466,75.9047668
-Jainam food,,,,restaurant,22.7207019,75.9004597
-Sharma Sweets,,,,restaurant,22.721221,75.8985534
-ATKT cafe,,,,restaurant,22.7180111,75.9055138
-Lord of Grill,,,,restaurant,22.6636278,75.8838454
-Apna Punjabi Dhaba,,,,restaurant,22.6634724,75.8834208
-Maratha Darbar,,,,restaurant,22.6582329,75.8846445
-Maayra Ka Dhaaba,,,,restaurant,22.6781986,75.8777271
-Ramesh South Indian,,,,restaurant,22.6765013,75.8782914
-Panna Restaurant & Sweets,,,,restaurant,22.6729012,75.880289
-D. K. Restaurant,,,,restaurant,22.6727602,75.8759284
-Kushwah Ji Tiffin Center,,,,restaurant,22.6724461,75.8754909
-Kesarlal,,,,restaurant,22.6702374,75.881027
-Apna Sweets,,,,restaurant,22.6995369,75.8669063
-Pishori Dhaba,,,,restaurant,22.6987248,75.8641434
-Gurjar Restaurant,,,,restaurant,22.6729545,75.8769241
-Taste N Best,,,,restaurant,22.6729273,75.8766558
-Sapna Restaurant,,,,restaurant,22.6789702,75.8772349
-Wayfare,https://wayfare.thenationtrip.com,+91 93997 70600,,restaurant,22.7461157,75.8956163
-,,,,restaurant,22.6689821,75.8815681
-Satkar Pure Veg,,,,restaurant,22.6725136,75.8803559
-Kitchen Sensation,,+919039046282,,restaurant,22.7244192,75.8847302
-Just Paratha,,,,restaurant,22.6901939,75.8642944
-Radha sanchi parler,,,,restaurant,22.6900442,75.8635677
-Primus Lounge,,,,restaurant,22.7277475,75.8049536
-Annapurna Restaurent,,,,restaurant,22.6564519,75.8072339
-vijayshree sandwhcih,,,,restaurant,22.7568097,75.8868026
-ridhi sidhi,,,,restaurant,22.7566714,75.8874708
-Pind balluchi,,,,restaurant,22.7559532,75.8941344
-Satkar Pure Veg Punjabi Dhaba,https://satkarpureveg.in,+919479313713,satkarpurevegindore@gmail.com,restaurant,22.6412741,75.8941297
-sun food restaurant,,,,restaurant,22.753817,75.8847761
-Orion Restaurant,https://www.orionrestro.in/,918109612326,,restaurant,22.7392853,75.9336261
-Mayur Dhaba,,,,restaurant,22.9636669,75.838119
-Shri Gajanand Bhojanalaya,,,,restaurant,22.715996,75.8533365
-Karnavat,,,,restaurant,22.724879,75.8246056
-Desi Tadka Restaurant,,,,restaurant,22.726756,75.8168448
-Mid Flight,,,,restaurant,22.7300071,75.8138083
-Mausa,,,,restaurant,22.7246808,75.8241325
-The Garden,,,,restaurant,22.7166564,75.9316025
-Wolf Casa,,,,restaurant,22.739175,75.9349029
-Hotel Apna Avenue,,,,restaurant,22.727049,75.8811176
-Jash Garden Restaurant,,,,restaurant,,
-Eden Garden,,,,restaurant,,
-Vrindavan Restaurant,,,,restaurant,,
-Desi Tadka,,,,restaurant,,
-Rangoon Garden,,,,restaurant,,
-Hunger Pangzzz,,,,restaurant,,
-JAM,,,,restaurant,,
-hul adda,,,,restaurant,,
-Canteen,,,,restaurant,,
-,,,,restaurant,,
-,,,,restaurant,,
-Veg Bites Cafe & Restaurant,,,,restaurant,,
-Nature's Kitchen Pluck & Dine,,,,restaurant,,
-Apna Sweets,,,,restaurant,,
-jay ambe sweets,,,,restaurant,,
-DZire paying guest and mess,,,,restaurant,,
-Matargasti,,084549 22434,,restaurant,,
-"Vairagi Chef ""Cakes and Street Food""",,,,restaurant,,
-Royal Bakery Stores,,,,restaurant,,
-Karnawat hotel,,,,restaurant,,
-Rajesh Restuarant,,,,restaurant,,
+name,website,phone,email,amenity,@lat,@lon
+Filfora,,,,restaurant,23.2639205,77.3802723
+Manohar Dairy & Restaurant,,,,restaurant,23.2342390,77.4339722
+Shree Krishna Chaat,,,,restaurant,23.2574182,77.4112473
+MANIT Canteen,,,,restaurant,23.2153081,77.4062995
+Bapu Ki Kutia,https://bapukikutia.in/,+91- 98260-23724,,restaurant,23.2387189,77.4024992
+Milan Restaurant,,,,restaurant,23.2325897,77.4332685
+Chote Nawab,,,,restaurant,23.2228062,77.4451417
+Mama Sweets,,,,restaurant,23.2224525,77.4452758
+Sunshine Tea Stall,,,,restaurant,23.2224660,77.4449821
+,,,,restaurant,23.2223697,77.4453003
+Nashta Ghar,,,,restaurant,23.2228148,77.4453040
+,,,,restaurant,23.2228854,77.4453087
+Sakshi Dhaba,,,,restaurant,23.2039138,77.3623026
+Sakshi dhabha,,,,restaurant,23.2041578,77.3622843
+Manohar dairy & Restaurant,,,,restaurant,23.2641182,77.4084612
+Wood Wind Bakery Lounge,,,,restaurant,23.1925884,77.4332746
+Bhopal Express,,,,restaurant,23.2426214,77.3874912
+Meena Hotel,,,,restaurant,23.2024194,77.3560413
+CanteenS Hg C Canteen,,,,restaurant,23.2657076,77.3460173
+Narmada Restaurant,,,,restaurant,23.2737474,77.3482334
+Canteen,,,,restaurant,23.2729798,77.3396810
+Shagun,,,,restaurant,23.2721881,77.3388156
+New Darbar,,,,restaurant,23.2716510,77.3377732
+SHUDDH BARFI HOUSE,,,,restaurant,23.2708541,77.3384221
+The taste of Nepal,,,,restaurant,23.2696640,77.3359347
+Evergreen Restaurant,,,,restaurant,23.2683053,77.3210879
+CHIRAYU BACKSIDE CANTEEN,,,,restaurant,23.2703202,77.3089227
+Gandhi Dham,,,,restaurant,23.2386604,77.4024464
+Saatvik,,,,restaurant,23.2359564,77.4018192
+Kwality,,,,restaurant,23.2365447,77.4006669
+Indian Coffee House,,,,restaurant,23.2348644,77.4017207
+Amer Bakery Hut,,,,restaurant,23.2174899,77.4276323
+china bowl,,,,restaurant,23.2088598,77.4368158
+e-7 resturant,,,,restaurant,23.2060998,77.4371650
+Sudarshan Restaurant,,+919752948585,,restaurant,23.2854431,77.2742119
+the famous chourasiya dhaba& restaurant,https://maps.app.goo.gl/uBhgSshnYe4fAvga8,7067669399,,restaurant,23.3399151,77.3998810
+the famous chourasiya dhaba restaurant,,7067669399,,restaurant,23.3388666,77.4001560
+Honey's Kitchen Official Bhopal,https://www.instagram.com/honeys_kitchen_official/,+91-7587-511503,,restaurant,23.2302310,77.4115543
+Sagar Gaire Restaurant,,,,restaurant,23.2677572,77.4669692
+Dev Bhog Restaurant,,,,restaurant,23.2550222,77.4719878
+,,,,restaurant,23.2478747,77.4709796
+The Farmer's Table,,07693-006738,,restaurant,23.1659662,77.4891090
+A-One Bhojnalaya.,,,,restaurant,23.2612392,77.3704237
+,,,,restaurant,23.2377108,77.2330105
+Hotel Shri Sarkaar,,,,restaurant,23.2207962,77.1848901
+,,,,restaurant,23.2215802,77.1846466
+,,,,restaurant,23.2212116,77.1853879
+Hotel Avantika,,,,restaurant,23.2557643,77.4299698
+Siddhaant,,+91 99813 12999,,restaurant,23.1968888,77.4304860
+Rajoriya Family Restaurant,,,,restaurant,23.2665569,77.4575969
+Moringa,,,,restaurant,23.2690772,77.4557383
+Daddy's Kitchen,,,,restaurant,23.2690016,77.4559669
+Tapti,,,,restaurant,23.2372905,77.3994555
+Hakeem Hotel,,,,restaurant,23.2360853,77.3987244
+Annapurna,,,,restaurant,23.2359016,77.3993340
+Leela's,,,,restaurant,23.2269984,77.4016026
+The Sheesham Bakers Restaurant,,,,restaurant,23.2565954,77.4571116
+Raj Darbar,,,,restaurant,23.2775813,77.4615937
+Pooja Bhojanalaya,,,,restaurant,23.2337371,77.4347825
+Windz and Waves,,,,restaurant,23.2416597,77.3805585
+Mess - 2,,,,restaurant,23.2913227,77.2708838
+Akash garden,,,,restaurant,23.2677321,77.3215000
+Canteen,,,,restaurant,23.2679784,77.3165677
+Shri Shankar Hotel Evam Nashta Ghar,,,,restaurant,23.2013766,77.3565905
+Mess - 1,,,,restaurant,23.2899946,77.2721613
+Mess - 3,,,,restaurant,23.2925352,77.2706018
+Mess - 4,,,,restaurant,23.2933012,77.2718372
+Mess - 5,,,,restaurant,23.2930321,77.2704516
+Mess - 6,,,,restaurant,23.2939129,77.2709181

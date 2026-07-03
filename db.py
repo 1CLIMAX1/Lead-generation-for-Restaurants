@@ -4,17 +4,23 @@ from pathlib import Path
 import pymysql
 
 
-def load_env_file(path=".env"):
-    env_path = Path(path)
+def load_env_file(path=None):
+    if path is None:
+        env_path = Path(__file__).resolve().parent / ".env"
+    else:
+        env_path = Path(path)
+        if not env_path.is_absolute():
+            env_path = Path(__file__).resolve().parent / env_path
+
     if not env_path.exists():
         return
 
-    for line in env_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
+    for line in env_path.read_text(encoding="utf-8-sig").splitlines():
+        line = line.strip().lstrip("\ufeff")
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        key = key.strip()
+        key = key.strip().lstrip("\ufeff")
         value = value.strip().strip('"').strip("'")
         os.environ.setdefault(key, value)
 
