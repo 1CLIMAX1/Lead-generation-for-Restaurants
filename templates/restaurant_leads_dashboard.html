@@ -123,7 +123,7 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     display: grid;
-    grid-template-columns: minmax(220px, 1fr) minmax(170px, 230px) minmax(170px, 230px) auto;
+    grid-template-columns: minmax(220px, 1fr) minmax(150px, 200px) minmax(150px, 200px) minmax(150px, 200px) auto;
     gap: 0.75rem;
     padding: 0.85rem;
     align-items: center;
@@ -502,7 +502,9 @@
     </div>
     <div class="control">
       <label for="locationFilter">Location</label>
-      <select id="locationFilter"><option>All Locations</option></select>
+      <select id="locationFilter">
+        <option value="">All Locations</option>
+      </select>
     </div>
     <div class="control">
       <label for="sortSelect">Sort</label>
@@ -626,6 +628,7 @@ const state = {
   leads: [],
   search: "",
   category: "All",
+  location: "",
   sort: "score-desc",
   page: 1,
   pageSize: 25,
@@ -638,6 +641,7 @@ const el = {
   leadRows: document.getElementById("leadRows"),
   searchInput: document.getElementById("searchInput"),
   categoryFilter: document.getElementById("categoryFilter"),
+  locationFilter: document.getElementById("locationFilter"),
   sortSelect: document.getElementById("sortSelect"),
   pageSize: document.getElementById("pageSize"),
   resultMeta: document.getElementById("resultMeta"),
@@ -732,14 +736,22 @@ async function requestJson(url, options = {}) {
 async function loadLeads() {
   state.loading = true;
   showError("");
-  el.headerMeta.textContent = "Loading leads from MySQL";
+
+  const cityLabel = state.location
+    ? state.location.charAt(0).toUpperCase() + state.location.slice(1)
+    : "All Locations";
+  el.headerMeta.textContent = "Loading leads from MySQL (" + cityLabel + ")";
 
   try {
-    const data = await requestJson(API_URL);
+    const url = state.location
+      ? API_URL + "?city=" + encodeURIComponent(state.location)
+      : API_URL;
+    const data = await requestJson(url);
     state.leads = Array.isArray(data.leads) ? data.leads : [];
     state.page = 1;
     renderAll();
-    el.headerMeta.textContent = "Connected to MySQL table: restaurant_leads_with_phone";
+    el.headerMeta.textContent = "Connected to MySQL table: restaurant_leads_with_phone" +
+      (state.location ? " · " + cityLabel : "");
   } catch (error) {
     showError(error.message);
     el.headerMeta.textContent = "Could not load leads";
@@ -775,6 +787,12 @@ function filteredLeads() {
 
   if (state.category !== "All") {
     leads = leads.filter(lead => String(lead.lead_category || "") === state.category);
+  }
+
+  if (state.location) {
+    leads = leads.filter(lead =>
+      String(lead.city || "").trim().toLowerCase() === state.location.toLowerCase()
+    );
   }
 
   if (query) {
@@ -855,9 +873,31 @@ function renderRows() {
   el.nextPage.disabled = state.page >= totalPages;
 }
 
+function cities() {
+  return [...new Set(
+    state.leads
+      .map(lead => String(lead.city || "").trim())
+      .filter(Boolean)
+      .map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase())
+  )].sort();
+}
+
+function renderLocations() {
+  const selected = state.location;
+  const allCities = cities();
+  el.locationFilter.innerHTML =
+    '<option value="">All Locations</option>' +
+    allCities
+      .map(c => '<option value="' + escapeHtml(c.toLowerCase()) + '"' +
+        (selected === c.toLowerCase() ? ' selected' : '') +
+        '>' + escapeHtml(c) + '</option>')
+      .join("");
+}
+
 function renderAll() {
   renderStats();
   renderCategories();
+  renderLocations();
   renderRows();
 }
 
@@ -971,6 +1011,12 @@ el.categoryFilter.addEventListener("change", event => {
   state.category = event.target.value;
   state.page = 1;
   renderRows();
+});
+
+el.locationFilter.addEventListener("change", event => {
+  state.location = event.target.value;
+  state.page = 1;
+  loadLeads();
 });
 
 el.sortSelect.addEventListener("change", event => {
