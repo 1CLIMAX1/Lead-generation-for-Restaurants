@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Leads Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef2f4;
+    --line: #d9e0e5;
+    --text: #17212b;
+    --muted: #667481;
+    --accent: #0f8b8d;
+    --accent-dark: #0b6869;
+    --danger: #c23b3b;
+    --warning: #c76f1a;
+    --good: #287d4f;
+    --low: #5468c7;
+    --shadow: 0 12px 32px rgba(22, 33, 43, 0.08);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  button, input, select {
+    font: inherit;
+  }
+
+  a {
+    color: var(--accent-dark);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .brand h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .brand p {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  main {
+    width: min(1480px, 100%);
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.95rem;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.55rem;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .stat-label {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--muted);
+    font-size: 0.77rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) minmax(130px, 180px) minmax(130px, 180px) minmax(130px, 180px) minmax(130px, 180px) auto;
+    gap: 0.75rem;
+    padding: 0.85rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .control label {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  input, select {
+    width: 100%;
+    min-height: 2.45rem;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--text);
+    padding: 0.55rem 0.7rem;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(15, 139, 141, 0.14);
+  }
+
+  .btn {
+    border: 1px solid transparent;
+    border-radius: 7px;
+    min-height: 2.45rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--surface-2);
+    color: var(--text);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    filter: brightness(0.98);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-danger {
+    background: #fff1f1;
+    border-color: #f1c7c7;
+    color: var(--danger);
+  }
+
+  .btn-small {
+    min-height: 2rem;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.82rem;
+  }
+
+  .btn-icon {
+    width: 2.35rem;
+    padding-inline: 0;
+  }
+
+  .table-shell {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .table-scroll {
+    overflow: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+  }
+
+  th, td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.78rem 0.85rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #fbfcfd;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    position: static;
+    top: 73px;
+    z-index: 5;
+  }
+
+  tbody tr:hover {
+    background: #f9fbfb;
+  }
+
+  .restaurant-name {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 750;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .score {
+    width: 3rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    font-weight: 800;
+  }
+
+  .score-hot { color: var(--danger); background: #fff1f1; }
+  .score-high { color: var(--warning); background: #fff4e8; }
+  .score-good { color: var(--good); background: #edf8f1; }
+  .score-low { color: var(--low); background: #f0f2ff; }
+
+  .badge {
+    display: inline-flex;
+    max-width: 220px;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.24rem 0.6rem;
+    font-size: 0.76rem;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .badge::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+  }
+
+  .badge-hot { color: var(--danger); background: #fff1f1; }
+  .badge-high { color: var(--warning); background: #fff4e8; }
+  .badge-online { color: var(--good); background: #edf8f1; }
+  .badge-low { color: var(--low); background: #f0f2ff; }
+  .badge-neutral { color: #5b6773; background: #eef2f4; }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .page-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .notice {
+    display: none;
+    border: 1px solid #f0c8c8;
+    background: #fff5f5;
+    color: #8a2e2e;
+    border-radius: 8px;
+    padding: 0.8rem 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .notice.show {
+    display: block;
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 1rem;
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(23, 33, 43, 0.48);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    z-index: 50;
+  }
+
+  .modal[hidden] {
+    display: none;
+  }
+
+  .dialog {
+    width: min(720px, 100%);
+    max-height: min(760px, calc(100vh - 2rem));
+    overflow: auto;
+    background: var(--surface);
+    border-radius: 10px;
+    box-shadow: 0 24px 70px rgba(23, 33, 43, 0.26);
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--line);
+    padding: 1rem;
+  }
+
+  .dialog-header h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .dialog-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .dialog-body .wide {
+    grid-column: 1 / -1;
+  }
+
+  .check-row {
+    min-height: 2.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .check-row input {
+    width: 1rem;
+    min-height: 1rem;
+  }
+
+  .dialog-footer {
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 1rem;
+  }
+
+  
+  .scrape-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .scrape-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .scrape-panel-header h2 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .scrape-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
+    margin-bottom: 0.75rem;
+  }
+
+  .sources-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+
+  .sources-row label {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 0.35rem;
+  }
+
+  .source-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--surface-2);
+    color: var(--muted);
+    user-select: none;
+    transition: all 0.12s;
+  }
+
+  .source-chip input { display: none; }
+
+  .source-chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .progress-wrap {
+    display: none;
+    margin-top: 0.75rem;
+  }
+
+  .progress-wrap.show { display: block; }
+
+  .progress-bar-track {
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-bar-fill.indeterminate {
+    width: 40%;
+    animation: slide 1.4s infinite ease-in-out;
+  }
+
+  @keyframes slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  .progress-log {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: monospace;
+    max-height: 120px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.5rem 0.65rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .scrape-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+
+  .scrape-status-badge.running { background: #fff4e8; color: var(--warning); }
+  .scrape-status-badge.done    { background: #edf8f1; color: var(--good); }
+  .scrape-status-badge.error   { background: #fff1f1; color: var(--danger); }
+
+  @media (max-width: 940px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .toolbar { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 620px) {
+    .app-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .header-actions {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .header-actions .btn {
+      flex: 1;
+    }
+
+    main {
+      padding: 0.85rem;
+    }
+
+    .stats, .toolbar, .dialog-body {
+      grid-template-columns: 1fr;
+    }
+
+    .dialog-body .wide {
+      grid-column: auto;
+    }
+
+    .pagination {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <h1>Restaurant Leads</h1>
+    <p id="headerMeta">Loading leads from MySQL</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="refreshBtn" type="button" title="Reload data">Refresh</button>
+    <div style="display:inline-flex;gap:.4rem">
+    <button class="btn" id="exportCsvBtn" type="button">Export CSV</button>
+    <button class="btn" id="exportExcelBtn" type="button">Export Excel</button>
+    </div>
+    <button class="btn btn-primary" id="addBtn" type="button">Add Lead</button>
+  </div>
+</header>
+
+<main>
+  <section class="stats" aria-label="Lead statistics">
+    <div class="stat">
+      <span class="stat-value" id="statTotal">0</span>
+      <span class="stat-label">Total Leads</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statHot">0</span>
+      <span class="stat-label">Hot Leads</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statHigh">0</span>
+      <span class="stat-label">High Priority</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statWebsite">0</span>
+      <span class="stat-label">With Website</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statPhone">0</span>
+      <span class="stat-label">With Phone</span>
+    </div>
+  </section>
+
+  
+  <section class="scrape-panel" id="scrapePanel">
+    <div class="scrape-panel-header">
+      <h2>🔍 Run New Scrape</h2>
+      <span class="scrape-status-badge" id="scrapeStatusBadge">Idle</span>
+    </div>
+    <div class="scrape-controls">
+      <div class="control">
+        <label for="scrapeDomaIn">Business Type</label>
+        <input id="scrapeDomaIn" type="text" placeholder='e.g. restaurant, gym, salon'>
+      </div>
+      <div class="control">
+        <label for="scrapeLocation">Location</label>
+        <input id="scrapeLocation" type="text" placeholder='e.g. Bhopal, Delhi, Pune'>
+      </div>
+      <div class="control">
+        <label for="scrapeCount">Max Leads</label>
+        <select id="scrapeCount">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+      </div>
+    </div>
+    <div class="sources-row">
+      <label>Sources:</label>
+      <label class="source-chip active" id="chip-google">
+        <input type="checkbox" value="google" checked> Google
+      </label>
+      <label class="source-chip" id="chip-linkedin">
+        <input type="checkbox" value="linkedin"> LinkedIn
+      </label>
+      <label class="source-chip" id="chip-facebook">
+        <input type="checkbox" value="facebook"> Facebook
+      </label>
+      <label class="source-chip" id="chip-reddit">
+        <input type="checkbox" value="reddit"> Reddit
+      </label>
+      <label class="source-chip" id="chip-justdial">
+        <input type="checkbox" value="justdial"> JustDial
+      </label>
+    </div>
+    <button class="btn btn-primary" id="startScrapeBtn" type="button">▶ Start Scrape</button>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill indeterminate" id="progressFill"></div>
+      </div>
+      <div class="progress-log" id="progressLog"></div>
+    </div>
+  </section>
+
+  <section class="toolbar" aria-label="Lead controls">
+    <div class="control">
+      <label for="searchInput">Search</label>
+      <input id="searchInput" type="search" placeholder="Restaurant, phone, website">
+    </div>
+    <div class="control">
+      <label for="categoryFilter">Category</label>
+      <select id="categoryFilter"></select>
+    </div>
+    <div class="control">
+      <label for="domainFilter">Domain</label>
+      <select id="domainFilter">
+        <option value="">All Domains</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="locationFilter">Location</label>
+      <select id="locationFilter">
+        <option value="">All Locations</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="sortSelect">Sort</label>
+      <select id="sortSelect">
+        <option value="score-desc">Score high to low</option>
+        <option value="score-asc">Score low to high</option>
+        <option value="name-asc">Name A to Z</option>
+        <option value="name-desc">Name Z to A</option>
+        <option value="category-asc">Category A to Z</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="pageSize">Rows</label>
+      <select id="pageSize">
+        <option value="25">25 per page</option>
+        <option value="50">50 per page</option>
+        <option value="100">100 per page</option>
+      </select>
+    </div>
+  </section>
+
+  <div class="notice" id="errorBox"></div>
+
+  <section class="table-shell" aria-label="Restaurant lead table">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Restaurant</th>
+            <th>Score</th>
+            <th>Category</th>
+            <th>Phone</th>
+            <th>Website</th>
+            <th>Status</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leadRows">
+          <tr><td colspan="7" class="empty">Loading leads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div id="resultMeta">0 results</div>
+      <div class="page-actions">
+        <button class="btn btn-small" id="prevPage" type="button">Previous</button>
+        <span id="pageMeta">Page 1</span>
+        <button class="btn btn-small" id="nextPage" type="button">Next</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="leadModal" hidden>
+  <form class="dialog" id="leadForm">
+    <div class="dialog-header">
+      <h2 id="modalTitle">Add Lead</h2>
+      <button class="btn btn-icon" id="closeModal" type="button" title="Close">X</button>
+    </div>
+    <div class="dialog-body">
+      <input type="hidden" id="leadId">
+
+      <div class="control wide">
+        <label for="leadName">Restaurant Name</label>
+        <input id="leadName" required maxlength="255">
+      </div>
+
+      <div class="control">
+        <label for="leadScore">Lead Score</label>
+        <input id="leadScore" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div class="control">
+        <label for="leadCategory">Lead Category</label>
+        <input id="leadCategory" list="categoryOptions" maxlength="120">
+        <datalist id="categoryOptions"></datalist>
+      </div>
+
+      <div class="control">
+        <label for="leadPhone">Phone</label>
+        <input id="leadPhone" inputmode="tel" maxlength="80">
+      </div>
+
+      <div class="control">
+        <label for="leadStatus">Scrape Status</label>
+        <input id="leadStatus" maxlength="80">
+      </div>
+
+      <div class="control wide">
+        <label for="leadUrl">Official Website</label>
+        <input id="leadUrl" type="url" maxlength="500">
+      </div>
+
+      <div class="control wide">
+        <label for="leadSearchUrl">Google Search URL</label>
+        <input id="leadSearchUrl" type="url" maxlength="500">
+      </div>
+
+      <div class="check-row wide">
+        <input id="leadHasWebsite" type="checkbox">
+        <label for="leadHasWebsite">Has official website</label>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn" type="button" id="cancelModal">Cancel</button>
+      <button class="btn btn-primary" type="submit" id="saveLead">Save Lead</button>
+    </div>
+  </form>
+</div>
+
+<script>
+const API_URL = "https://lead-generation-for-restaurants.onrender.com/api/leads";
+const SCRAPE_URL = "https://lead-generation-for-restaurants.onrender.com/api/scrape";
+const DOMAINS_URL = "https://lead-generation-for-restaurants.onrender.com/api/domains";
+const CITIES_URL = "https://lead-generation-for-restaurants.onrender.com/api/cities";
+
+const DEFAULT_CATEGORIES = [
+  "Hot Lead", "High Priority", "Medium Priority", "Strong Online Presence"
+];
+
+const state = {
+  leads: [],
+  search: "",
+  category: "All",
+  location: "",
+  domain: "",
+  sort: "score-desc",
+  page: 1,
+  pageSize: 25,
+  loading: false,
+  scrapeJobId: null,
+  scrapePolling: null,
+};
+
+const el = {
+  headerMeta:        document.getElementById("headerMeta"),
+  errorBox:          document.getElementById("errorBox"),
+  leadRows:          document.getElementById("leadRows"),
+  searchInput:       document.getElementById("searchInput"),
+  categoryFilter:    document.getElementById("categoryFilter"),
+  locationFilter:    document.getElementById("locationFilter"),
+  domainFilter:      document.getElementById("domainFilter"),
+  sortSelect:        document.getElementById("sortSelect"),
+  pageSize:          document.getElementById("pageSize"),
+  resultMeta:        document.getElementById("resultMeta"),
+  pageMeta:          document.getElementById("pageMeta"),
+  prevPage:          document.getElementById("prevPage"),
+  nextPage:          document.getElementById("nextPage"),
+  statTotal:         document.getElementById("statTotal"),
+  statHot:           document.getElementById("statHot"),
+  statHigh:          document.getElementById("statHigh"),
+  statWebsite:       document.getElementById("statWebsite"),
+  statPhone:         document.getElementById("statPhone"),
+  modal:             document.getElementById("leadModal"),
+  modalTitle:        document.getElementById("modalTitle"),
+  form:              document.getElementById("leadForm"),
+  leadId:            document.getElementById("leadId"),
+  leadName:          document.getElementById("leadName"),
+  leadScore:         document.getElementById("leadScore"),
+  leadCategory:      document.getElementById("leadCategory"),
+  categoryOptions:   document.getElementById("categoryOptions"),
+  leadPhone:         document.getElementById("leadPhone"),
+  leadStatus:        document.getElementById("leadStatus"),
+  leadUrl:           document.getElementById("leadUrl"),
+  leadSearchUrl:     document.getElementById("leadSearchUrl"),
+  leadHasWebsite:    document.getElementById("leadHasWebsite"),
+  // Scrape panel
+  scrapeDomaIn:      document.getElementById("scrapeDomaIn"),
+  scrapeLocation:    document.getElementById("scrapeLocation"),
+  scrapeCount:       document.getElementById("scrapeCount"),
+  startScrapeBtn:    document.getElementById("startScrapeBtn"),
+  progressWrap:      document.getElementById("progressWrap"),
+  progressFill:      document.getElementById("progressFill"),
+  progressLog:       document.getElementById("progressLog"),
+  scrapeStatusBadge: document.getElementById("scrapeStatusBadge"),
+};
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function safeUrl(value) {
+  const url = String(value || "").trim();
+  return /^https?:\/\//i.test(url) ? url : "";
+}
+
+function phoneHref(value) {
+  const cleaned = String(value || "").replace(/[^\d+]/g, "");
+  return cleaned ? "tel:" + cleaned : "";
+}
+
+function hasPhone(lead)   { return Boolean(String(lead.extracted_phone || "").trim()); }
+function hasWebsite(lead) { return Boolean(lead.has_official_website || safeUrl(lead.official_url)); }
+
+function scoreClass(score) {
+  if (score >= 90) return "score-hot";
+  if (score >= 70) return "score-high";
+  if (score >= 30) return "score-good";
+  return "score-low";
+}
+
+function badgeClass(cat) {
+  const v = String(cat || "").toLowerCase();
+  if (v.includes("hot"))    return "badge-hot";
+  if (v.includes("high"))   return "badge-high";
+  if (v.includes("online") || v.includes("website")) return "badge-online";
+  if (v.includes("low"))    return "badge-low";
+  return "badge-neutral";
+}
+
+function showError(msg) {
+  el.errorBox.textContent = msg || "";
+  el.errorBox.classList.toggle("show", Boolean(msg));
+}
+
+async function requestJson(url, options = {}) {
+  const resp = await fetch(url, { headers: {"Content-Type":"application/json"}, ...options });
+  const body = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(body.error || "Server error");
+  return body;
+}
+
+// ── Load leads ────────────────────────────────────────────────────────────────
+
+async function loadLeads() {
+  state.loading = true;
+  showError("");
+  el.headerMeta.textContent = "Loading leads...";
+
+  try {
+    const params = new URLSearchParams();
+    if (state.domain)   params.set("domain",   state.domain);
+    if (state.location) params.set("city",      state.location);
+    const url  = API_URL + (params.toString() ? "?" + params.toString() : "");
+    const data = await requestJson(url);
+    state.leads = Array.isArray(data.leads) ? data.leads : [];
+    state.page  = 1;
+    renderAll();
+
+    const parts = [];
+    if (state.domain)   parts.push(state.domain);
+    if (state.location) parts.push(state.location);
+    el.headerMeta.textContent =
+      "Connected · " + state.leads.length + " leads" +
+      (parts.length ? " · " + parts.join(", ") : "");
+  } catch (err) {
+    showError(err.message);
+    el.headerMeta.textContent = "Could not load leads";
+    el.leadRows.innerHTML = '<tr><td colspan="7" class="empty">No data available.</td></tr>';
+  } finally {
+    state.loading = false;
+  }
+}
+
+// ── Load domains + cities from API ───────────────────────────────────────────
+
+async function loadDomainFilter() {
+  try {
+    const data = await requestJson(DOMAINS_URL);
+    const domains = data.domains || [];
+    const selected = state.domain;
+    el.domainFilter.innerHTML =
+      '<option value="">All Domains</option>' +
+      domains.map(d =>
+        '<option value="' + escapeHtml(d) + '"' +
+        (selected === d ? ' selected' : '') + '>' +
+        escapeHtml(d.charAt(0).toUpperCase() + d.slice(1)) + '</option>'
+      ).join("");
+  } catch (_) {}
+}
+
+async function loadCityFilter() {
+  try {
+    const url = CITIES_URL + (state.domain ? "?domain=" + encodeURIComponent(state.domain) : "");
+    const data = await requestJson(url);
+    const cities = data.cities || [];
+    const selected = state.location;
+    el.locationFilter.innerHTML =
+      '<option value="">All Locations</option>' +
+      cities.map(c =>
+        '<option value="' + escapeHtml(c.toLowerCase()) + '"' +
+        (selected === c.toLowerCase() ? ' selected' : '') + '>' +
+        escapeHtml(c) + '</option>'
+      ).join("");
+  } catch (_) {}
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function categories() {
+  const fromData = state.leads.map(l => String(l.lead_category || "").trim()).filter(Boolean);
+  return [...new Set([...DEFAULT_CATEGORIES, ...fromData])];
+}
+
+function renderCategories() {
+  const selected = state.category;
+  const opts = ["All", ...categories()];
+  el.categoryFilter.innerHTML = opts.map(c =>
+    '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>'
+  ).join("");
+  el.categoryFilter.value = opts.includes(selected) ? selected : "All";
+  el.categoryOptions.innerHTML = categories().map(c =>
+    '<option value="' + escapeHtml(c) + '"></option>'
+  ).join("");
+}
+
+function filteredLeads() {
+  const query = state.search.trim().toLowerCase();
+  let leads = [...state.leads];
+
+  if (state.category !== "All") {
+    leads = leads.filter(l => String(l.lead_category || "") === state.category);
+  }
+  if (state.location) {
+    leads = leads.filter(l =>
+      String(l.city || "").trim().toLowerCase() === state.location.toLowerCase()
+    );
+  }
+  if (state.domain) {
+    leads = leads.filter(l =>
+      String(l.domain || "").trim().toLowerCase() === state.domain.toLowerCase()
+    );
+  }
+  if (query) {
+    leads = leads.filter(l =>
+      [l.name, l.extracted_phone, l.official_url, l.lead_category, l.scrape_status, l.city, l.domain]
+        .some(v => String(v || "").toLowerCase().includes(query))
+    );
+  }
+
+  leads.sort((a, b) => {
+    const sA = Number(a.lead_score || 0), sB = Number(b.lead_score || 0);
+    const nA = String(a.name || ""), nB = String(b.name || "");
+    const cA = String(a.lead_category || ""), cB = String(b.lead_category || "");
+    if (state.sort === "score-asc")    return sA - sB;
+    if (state.sort === "name-asc")     return nA.localeCompare(nB);
+    if (state.sort === "name-desc")    return nB.localeCompare(nA);
+    if (state.sort === "category-asc") return cA.localeCompare(cB);
+    return sB - sA;
+  });
+
+  return leads;
+}
+
+function renderStats() {
+  el.statTotal.textContent   = state.leads.length;
+  el.statHot.textContent     = state.leads.filter(l => String(l.lead_category || "").toLowerCase().includes("hot")).length;
+  el.statHigh.textContent    = state.leads.filter(l => String(l.lead_category || "").toLowerCase().includes("high")).length;
+  el.statWebsite.textContent = state.leads.filter(hasWebsite).length;
+  el.statPhone.textContent   = state.leads.filter(hasPhone).length;
+}
+
+function renderRows() {
+  const leads = filteredLeads();
+  const totalPages = Math.max(1, Math.ceil(leads.length / state.pageSize));
+  state.page = Math.min(state.page, totalPages);
+  const start = (state.page - 1) * state.pageSize;
+  const pageRows = leads.slice(start, start + state.pageSize);
+
+  if (!pageRows.length) {
+    el.leadRows.innerHTML = '<tr><td colspan="7" class="empty">No leads match the current filters.</td></tr>';
+  } else {
+    el.leadRows.innerHTML = pageRows.map(lead => {
+      const score      = Number(lead.lead_score || 0);
+      const category   = lead.lead_category || "Uncategorized";
+      const phone      = String(lead.extracted_phone || "").trim();
+      const phoneLink  = phoneHref(phone);
+      const website    = safeUrl(lead.official_url);
+      const searchUrl  = safeUrl(lead.google_search_url) ||
+        "https://www.google.com/search?q=" + encodeURIComponent((lead.name || "") + " " + (lead.domain || ""));
+      const cityDomain = [lead.city, lead.domain].filter(Boolean).join(" · ");
+
+      return '<tr>' +
+        '<td><div class="restaurant-name" title="' + escapeHtml(lead.name) + '">' +
+          escapeHtml(lead.name || "Unnamed") + '</div>' +
+          (cityDomain ? '<div style="font-size:0.75rem;color:var(--muted);margin-top:2px">' + escapeHtml(cityDomain) + '</div>' : '') +
+        '</td>' +
+        '<td><span class="score ' + scoreClass(score) + '">' + escapeHtml(score) + '</span></td>' +
+        '<td><span class="badge ' + badgeClass(category) + '">' + escapeHtml(category) + '</span></td>' +
+        '<td>' + (phoneLink ? '<a href="' + escapeHtml(phoneLink) + '">' + escapeHtml(phone) + '</a>' : '<span class="muted">No phone</span>') + '</td>' +
+        '<td>' + (website ? '<a href="' + escapeHtml(website) + '" target="_blank" rel="noopener">Open</a>' : '<span class="muted">No website</span>') + '</td>' +
+        '<td><span class="muted">' + escapeHtml(lead.scrape_status || "") + '</span></td>' +
+        '<td><div class="actions">' +
+          '<a class="btn btn-small" href="' + escapeHtml(searchUrl) + '" target="_blank" rel="noopener">Search</a>' +
+          '<button class="btn btn-small" type="button" data-action="edit" data-id="' + escapeHtml(lead._id || lead.name) + '">Edit</button>' +
+          '<button class="btn btn-small btn-danger" type="button" data-action="delete" data-id="' + escapeHtml(lead._id || lead.name) + '">Delete</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join("");
+  }
+
+  const shownStart = leads.length ? start + 1 : 0;
+  const shownEnd   = Math.min(start + state.pageSize, leads.length);
+  el.resultMeta.textContent = shownStart + "–" + shownEnd + " of " + leads.length;
+  el.pageMeta.textContent   = "Page " + state.page + " of " + totalPages;
+  el.prevPage.disabled = state.page <= 1;
+  el.nextPage.disabled = state.page >= totalPages;
+}
+
+function renderAll() {
+  renderStats();
+  renderCategories();
+  renderRows();
+}
+
+// ── Scrape panel ──────────────────────────────────────────────────────────────
+
+// Source chip toggle
+document.querySelectorAll(".source-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    chip.classList.toggle("active");
+    const cb = chip.querySelector("input");
+    cb.checked = chip.classList.contains("active");
+  });
+});
+
+function getSelectedSources() {
+  return [...document.querySelectorAll(".source-chip.active input")]
+    .map(cb => cb.value);
+}
+
+function setScrapeStatus(status) {
+  const badge = el.scrapeStatusBadge;
+  badge.className = "scrape-status-badge " + (status || "");
+  const labels = { running: "⏳ Running", done: "✅ Done", error: "❌ Error", idle: "Idle", queued: "⏳ Queued" };
+  badge.textContent = labels[status] || "Idle";
+}
+
+function appendLog(line) {
+  el.progressLog.textContent += line + "\n";
+  el.progressLog.scrollTop = el.progressLog.scrollHeight;
+}
+
+async function startScrape() {
+  const domain   = el.scrapeDomaIn.value.trim();
+  const location = el.scrapeLocation.value.trim();
+  const sources  = getSelectedSources();
+  const count    = parseInt(el.scrapeCount.value);
+
+  if (!domain)   { showError("Enter a business type before scraping."); return; }
+  if (!location) { showError("Enter a location before scraping."); return; }
+  if (!sources.length) { showError("Select at least one source platform."); return; }
+
+  showError("");
+  el.startScrapeBtn.disabled = true;
+  el.progressWrap.classList.add("show");
+  el.progressLog.textContent = "";
+  setScrapeStatus("queued");
+  appendLog("Sending scrape request...");
+
+  try {
+    const data = await requestJson(SCRAPE_URL, {
+      method: "POST",
+      body: JSON.stringify({ domain, location, sources, count })
+    });
+
+    state.scrapeJobId = data.job_id;
+    appendLog("Job started: " + data.job_id);
+    setScrapeStatus("running");
+    pollScrapeStatus();
+
+  } catch (err) {
+    showError(err.message);
+    setScrapeStatus("error");
+    el.startScrapeBtn.disabled = false;
+  }
+}
+
+function pollScrapeStatus() {
+  if (state.scrapePolling) clearInterval(state.scrapePolling);
+  let lastLogCount = 0;
+
+  state.scrapePolling = setInterval(async () => {
+    try {
+      const statusUrl = SCRAPE_URL + "/status?job_id=" + encodeURIComponent(state.scrapeJobId);
+      const data = await requestJson(statusUrl);
+
+      // Append only new log lines
+      const newLines = (data.log || []).slice(lastLogCount);
+      newLines.forEach(appendLog);
+      lastLogCount = (data.log || []).length;
+
+      setScrapeStatus(data.status);
+
+      if (data.status === "done" || data.status === "error") {
+        clearInterval(state.scrapePolling);
+        state.scrapePolling = null;
+        el.startScrapeBtn.disabled = false;
+        el.progressFill.classList.remove("indeterminate");
+        el.progressFill.style.width = "100%";
+
+        if (data.status === "done") {
+          appendLog("✅ Scrape complete — reloading leads...");
+          await loadDomainFilter();
+          await loadCityFilter();
+          await loadLeads();
+        }
+      }
+    } catch (_) {}
+  }, 2000); // poll every 2s
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+
+function findLead(id) {
+  return state.leads.find(l => String(l._id || l.name) === String(id));
+}
+
+function openModal(lead = null) {
+  el.form.reset();
+  el.leadId.value        = lead?._id || lead?.name || "";
+  el.modalTitle.textContent = lead ? "Edit Lead" : "Add Lead";
+  el.leadName.value      = lead?.name || "";
+  el.leadScore.value     = lead?.lead_score ?? 0;
+  el.leadCategory.value  = lead?.lead_category || "High Priority";
+  el.leadPhone.value     = lead?.extracted_phone || "";
+  el.leadStatus.value    = lead?.scrape_status || "";
+  el.leadUrl.value       = lead?.official_url || "";
+  el.leadSearchUrl.value = lead?.google_search_url || "";
+  el.leadHasWebsite.checked = hasWebsite(lead || {});
+  el.modal.hidden = false;
+  el.leadName.focus();
+}
+
+function closeModal() { el.modal.hidden = true; }
+
+function formPayload() {
+  return {
+    name:                el.leadName.value,
+    lead_score:          el.leadScore.value,
+    lead_category:       el.leadCategory.value,
+    extracted_phone:     el.leadPhone.value,
+    scrape_status:       el.leadStatus.value,
+    official_url:       el.leadUrl.value,
+    google_search_url:   el.leadSearchUrl.value,
+    has_official_website: el.leadHasWebsite.checked,
+  };
+}
+
+async function saveLead(event) {
+  event.preventDefault();
+  const id     = el.leadId.value;
+  const method = id ? "PUT" : "POST";
+  const url    = id ? API_URL + "/" + encodeURIComponent(id) : API_URL;
+  const saveButton = document.getElementById("saveLead");
+  saveButton.disabled = true;
+  showError("");
+  try {
+    await requestJson(url, { method, body: JSON.stringify(formPayload()) });
+    closeModal();
+    await loadLeads();
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    saveButton.disabled = false;
+  }
+}
+
+async function deleteLead(id) {
+  const lead = findLead(id);
+  if (!lead || !confirm("Delete " + (lead.name || "this lead") + "?")) return;
+  showError("");
+  try {
+    await requestJson(API_URL + "/" + encodeURIComponent(id), { method: "DELETE" });
+    state.leads = state.leads.filter(l => String(l._id || l.name) !== String(id));
+    renderAll();
+  } catch (err) {
+    showError(err.message);
+  }
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+
+function exportCSV() {
+  const rows = filteredLeads();
+  if (!rows.length) return;
+  const headers = Object.keys(rows[0]);
+  const csv = [headers.join(",")].concat(
+    rows.map(r => headers.map(h => '"' + String(r[h] ?? "").replace(/"/g, '""') + '"').join(","))
+  ).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = "leads_export.csv";
+  a.click();
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────────
+
+document.getElementById("refreshBtn").addEventListener("click", loadLeads);
+document.getElementById("addBtn").addEventListener("click", () => openModal());
+document.getElementById("closeModal").addEventListener("click", closeModal);
+document.getElementById("cancelModal").addEventListener("click", closeModal);
+document.getElementById("exportCsvBtn").addEventListener("click", exportCSV);
+document.getElementById("exportExcelBtn").addEventListener("click", exportCSV);
+el.startScrapeBtn.addEventListener("click", startScrape);
+el.form.addEventListener("submit", saveLead);
+
+el.modal.addEventListener("click", e => { if (e.target === el.modal) closeModal(); });
+
+el.searchInput.addEventListener("input", e => { state.search = e.target.value; state.page = 1; renderRows(); });
+el.categoryFilter.addEventListener("change", e => { state.category = e.target.value; state.page = 1; renderRows(); });
+el.sortSelect.addEventListener("change", e => { state.sort = e.target.value; state.page = 1; renderRows(); });
+el.pageSize.addEventListener("change", e => { state.pageSize = Number(e.target.value); state.page = 1; renderRows(); });
+el.prevPage.addEventListener("click", () => { state.page = Math.max(1, state.page - 1); renderRows(); });
+el.nextPage.addEventListener("click", () => { state.page += 1; renderRows(); });
+
+el.domainFilter.addEventListener("change", async e => {
+  state.domain = e.target.value;
+  state.page   = 1;
+  await loadCityFilter();
+  await loadLeads();
+});
+
+el.locationFilter.addEventListener("change", async e => {
+  state.location = e.target.value;
+  state.page     = 1;
+  await loadLeads();
+});
+
+el.leadRows.addEventListener("click", e => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  if (btn.dataset.action === "edit")   openModal(findLead(id));
+  if (btn.dataset.action === "delete") deleteLead(id);
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+(async () => {
+  await loadDomainFilter();
+  await loadCityFilter();
+  await loadLeads();
+})();
+</script>
+</body>
+</html>
