@@ -52,19 +52,9 @@ CORS(app)  # allow dashboard (different origin) to call this API
 _jobs: dict = {}
 _jobs_lock = threading.Lock()
 
-
-def table_name_for_domain(domain: str) -> str:
-    safe = re.sub(r"[^\w]", "_", domain.strip().lower())
-    safe = re.sub(r"_+", "_", safe).strip("_")
-    return f"leads_{safe}"
+TABLE_NAME = "leads"
 
 
-def get_all_lead_tables(cursor) -> list:
-    cursor.execute(
-        "SELECT TABLE_NAME FROM information_schema.TABLES "
-        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME LIKE 'leads_%'"
-    )
-    return [row["TABLE_NAME"] for row in cursor.fetchall()]
 
 
 # ── Job runner (runs in background thread) ────────────────────────────────────
@@ -210,43 +200,25 @@ def get_leads():
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            all_tables = get_all_lead_tables(cursor)
-            if not all_tables:
-                return jsonify({"leads": []})
+            query = f"SELECT * FROM {quote_identifier(TABLE_NAME)} WHERE 1=1"
+            params = []
 
             if domain:
-                tbl = table_name_for_domain(domain)
-                tables_to_query = [tbl] if tbl in all_tables else []
-            else:
-                tables_to_query = all_tables
+                query += " AND LOWER(domain)=LOWER(%s)"
+                params.append(domain)
 
-            if not tables_to_query:
-                return jsonify({"leads": []})
+            if city:
+                query += " AND LOWER(city)=LOWER(%s)"
+                params.append(city)
 
-            leads = []
-            for tbl in tables_to_query:
-                if city:
-                    cursor.execute(
-                        f"SELECT * FROM {quote_identifier(tbl)} "
-                        f"WHERE LOWER(city) = LOWER(%s) "
-                        f"ORDER BY lead_score DESC LIMIT %s",
-                        (city, limit)
-                    )
-                else:
-                    cursor.execute(
-                        f"SELECT * FROM {quote_identifier(tbl)} "
-                        f"ORDER BY lead_score DESC LIMIT %s",
-                        (limit,)
-                    )
-                rows = cursor.fetchall()
-                for row in rows:
-                    row["_table"] = tbl
-                    # Ensure _id exists for dashboard compatibility
-                    row["_id"] = row.get("name", "")
-                leads.extend(rows)
+            query += " ORDER BY lead_score DESC LIMIT %s"
+            params.append(limit)
 
-            # Re-sort merged results
-            leads.sort(key=lambda r: int(r.get("lead_score") or 0), reverse=True)
+            cursor.execute(query, params)
+            leads = cursor.fetchall()
+
+            for row in leads:
+                row["_id"] = row["id"]
 
     finally:
         conn.close()
@@ -257,79 +229,89 @@ def get_leads():
 @app.post("/api/leads")
 def add_lead():
     body = request.get_json(force=True, silent=True) or {}
-    domain = body.get("domain", "business")
-    tbl    = table_name_for_domain(domain)
+
+    cols = [c for c in body if c not in ("_id", "_table")]
+
+    if "name" not in cols:
+        return jsonify({"error": "name is required"}), 400
 
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            # ensure_table imported logic inline to avoid circular import issues
-            cursor.execute(
-                "SELECT COUNT(*) AS count FROM information_schema.TABLES "
-                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s", (tbl,)
-            )
-            if cursor.fetchone()["count"] == 0:
-                return jsonify({"error": f"Table {tbl} does not exist yet. Run a scrape first."}), 400
+            col_sql = ", ".join(quote_identifier(c) for c in cols)
+            val_sql = ", ".join(["%s"] * len(cols))
+            values = [body[c] for c in cols]
 
-            cols = [c for c in body if c not in ("_id", "_table", "domain")]
-            if "name" not in cols:
-                return jsonify({"error": "name is required"}), 400
-
-            col_sql   = ", ".join(quote_identifier(c) for c in cols)
-            val_sql   = ", ".join(["%s"] * len(cols))
-            values    = [body[c] for c in cols]
             cursor.execute(
-                f"INSERT INTO {quote_identifier(tbl)} ({col_sql}) VALUES ({val_sql})",
-                values
+                f"INSERT INTO {quote_identifier(TABLE_NAME)} ({col_sql}) VALUES ({val_sql})",
+                values,
             )
+
         conn.commit()
+
     finally:
         conn.close()
 
     return jsonify({"ok": True})
 
 
-@app.put("/api/leads/<path:lead_id>")
-def update_lead(lead_id: str):
-    body   = request.get_json(force=True, silent=True) or {}
-    domain = body.get("domain", "business")
-    tbl    = table_name_for_domain(domain)
 
-    update_cols = {k: v for k, v in body.items()
-                   if k not in ("name", "_id", "_table", "domain")}
+@app.put("/api/leads/<int:lead_id>")
+def update_lead(lead_id):
+
+    body = request.get_json(force=True, silent=True) or {}
+
+    update_cols = {
+        k: v for k, v in body.items()
+        if k not in ("id", "_id", "_table")
+    }
+
     if not update_cols:
         return jsonify({"error": "nothing to update"}), 400
 
-    set_sql = ", ".join(f"{quote_identifier(k)} = %s" for k in update_cols)
-    values  = list(update_cols.values()) + [lead_id]
+    set_sql = ", ".join(
+        f"{quote_identifier(k)}=%s"
+        for k in update_cols
+    )
+
+    values = list(update_cols.values())
+    values.append(lead_id)
 
     conn = get_connection()
+
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                f"UPDATE {quote_identifier(tbl)} SET {set_sql} WHERE name = %s",
-                values
+                f"""
+                UPDATE {quote_identifier(TABLE_NAME)}
+                SET {set_sql}
+                WHERE id=%s
+                """,
+                values,
             )
+
         conn.commit()
+
     finally:
         conn.close()
 
     return jsonify({"ok": True})
 
 
-@app.delete("/api/leads/<path:lead_id>")
-def delete_lead(lead_id: str):
-    domain = request.args.get("domain", "business")
-    tbl    = table_name_for_domain(domain)
+@app.delete("/api/leads/<int:lead_id>")
+def delete_lead(lead_id):
 
     conn = get_connection()
+
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                f"DELETE FROM {quote_identifier(tbl)} WHERE name = %s",
-                (lead_id,)
+                f"DELETE FROM {quote_identifier(TABLE_NAME)} WHERE id=%s",
+                (lead_id,),
             )
+
         conn.commit()
+
     finally:
         conn.close()
 
@@ -340,51 +322,91 @@ def delete_lead(lead_id: str):
 
 @app.get("/api/domains")
 def get_domains():
-    """Returns list of domains that have data, e.g. ['restaurant', 'gym']"""
+
     conn = get_connection()
+
     try:
         with conn.cursor() as cursor:
-            tables = get_all_lead_tables(cursor)
+
+            cursor.execute("""
+                SELECT DISTINCT domain
+                FROM leads
+                WHERE domain IS NOT NULL
+                ORDER BY domain
+            """)
+
+            domains = [
+                r["domain"]
+                for r in cursor.fetchall()
+            ]
+
     finally:
         conn.close()
 
-    domains = [t.replace("leads_", "", 1) for t in tables]
     return jsonify({"domains": domains})
 
 
 @app.get("/api/cities")
 def get_cities():
-    """
-    GET /api/cities?domain=restaurant
-    Returns distinct cities for a domain (or all domains if not specified).
-    """
+
     domain = request.args.get("domain", "").strip()
 
     conn = get_connection()
+
     try:
         with conn.cursor() as cursor:
-            all_tables = get_all_lead_tables(cursor)
-            if domain:
-                tbl = table_name_for_domain(domain)
-                tables = [tbl] if tbl in all_tables else []
-            else:
-                tables = all_tables
 
-            cities = set()
-            for tbl in tables:
+            if domain:
+
                 cursor.execute(
-                    f"SELECT DISTINCT city FROM {quote_identifier(tbl)} "
-                    f"WHERE city IS NOT NULL AND city != ''"
+                    """
+                    SELECT DISTINCT city
+                    FROM leads
+                    WHERE LOWER(domain)=LOWER(%s)
+                    ORDER BY city
+                    """,
+                    (domain,),
                 )
-                for row in cursor.fetchall():
-                    cities.add(row["city"].strip())
+
+            else:
+
+                cursor.execute("""
+                    SELECT DISTINCT city
+                    FROM leads
+                    ORDER BY city
+                """)
+
+            cities = [
+                r["city"]
+                for r in cursor.fetchall()
+                if r["city"]
+            ]
+
     finally:
         conn.close()
 
-    return jsonify({"cities": sorted(cities)})
+    return jsonify({"cities": cities})
 
 
 # ── Health check ──────────────────────────────────────────────────────────────
+
+@app.get("/test-db")
+def test_db():
+
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
+
+            cursor.execute(
+                "SELECT COUNT(*) AS total FROM leads"
+            )
+
+            return jsonify(cursor.fetchone())
+
+    finally:
+        conn.close()
+
 
 @app.get("/health")
 def health():

@@ -17,6 +17,8 @@ from pathlib import Path
 
 from db import get_connection, quote_identifier
 
+TABLE_NAME = "leads"
+
 
 UPLOAD_COLUMNS = [
     "name", "domain", "city",
@@ -53,12 +55,6 @@ TABLE_SCHEMA = {
 }
 
 
-def table_name_for_domain(domain: str) -> str:
-    """'Restaurant' → 'leads_restaurant', 'Yoga Studio' → 'leads_yoga_studio'"""
-    safe = re.sub(r"[^\w]", "_", domain.strip().lower())
-    safe = re.sub(r"_+", "_", safe).strip("_")
-    return f"leads_{safe}"
-
 
 def read_rows(path):
     with Path(path).open("r", encoding="utf-8-sig", newline="") as f:
@@ -89,7 +85,7 @@ def clean_value(column, raw):
     return str(raw or "").strip()
 
 
-def ensure_table(cursor, tbl: str):
+
     cursor.execute(
         "SELECT COUNT(*) AS count FROM information_schema.TABLES "
         "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s",
@@ -125,19 +121,18 @@ def ensure_table(cursor, tbl: str):
             print(f"  Added column: {col} to {tbl}")
 
 
-def upsert_rows(cursor, rows, tbl: str) -> int:
+def upsert_rows(cursor, rows) -> int:
     if not rows:
         return 0
 
     col_sql    = ", ".join(quote_identifier(c) for c in UPLOAD_COLUMNS)
     placeholders = ", ".join(["%s"] * len(UPLOAD_COLUMNS))
-    updates    = ", ".join(
-        f"{quote_identifier(c)} = VALUES({quote_identifier(c)})"
-        for c in UPLOAD_COLUMNS
-        if c not in ("name", "city")
-    )
+    updates = ", ".join(
+    f"{quote_identifier(c)} = VALUES({quote_identifier(c)})"
+    for c in UPLOAD_COLUMNS
+)
     sql = (
-        f"INSERT INTO {quote_identifier(tbl)} ({col_sql}) "
+        f"INSERT INTO {quote_identifier(TABLE_NAME)} ({col_sql}) "
         f"VALUES ({placeholders}) "
         f"ON DUPLICATE KEY UPDATE {updates}"
     )
@@ -167,20 +162,17 @@ def main():
         return 0
 
     # Determine domain — from arg or first row
-    domain = args.domain or rows[0].get("domain", "business")
-    tbl    = table_name_for_domain(domain)
-    print(f"Uploading to table: {tbl}")
+    print(f"Uploading to table: {TABLE_NAME}")
 
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            ensure_table(cursor, tbl)
-            uploaded = upsert_rows(cursor, rows, tbl)
+            uploaded = upsert_rows(cursor, rows)
         conn.commit()
     finally:
         conn.close()
 
-    print(f"✅  Uploaded {uploaded} rows → {tbl}")
+    print(f"✅ Uploaded {uploaded} rows.")
     return 0
 
 

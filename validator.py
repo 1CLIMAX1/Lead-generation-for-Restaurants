@@ -200,8 +200,12 @@ def clean_row(row: dict):
     return clean, ""
 
 
-def dedupe_key(row: dict) -> str:
-    return re.sub(r"\s+", " ", row["name"].strip().lower())
+def dedupe_key(row):
+    return (
+        re.sub(r"\s+", " ", row["name"].strip().lower()),
+        row["city"].strip().lower(),
+        row["domain"].strip().lower(),
+    )
 
 
 def main():
