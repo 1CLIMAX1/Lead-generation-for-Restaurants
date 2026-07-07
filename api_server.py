@@ -34,12 +34,16 @@ import time
 import uuid
 from datetime import datetime, timezone
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 
 from db import get_connection, quote_identifier
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
 CORS(app)  # allow dashboard (different origin) to call this API
 
 # ── In-memory job store ───────────────────────────────────────────────────────
@@ -122,6 +126,11 @@ def _run_pipeline_job(job_id: str, domain: str, location: str,
 
 
 # ── /api/scrape ───────────────────────────────────────────────────────────────
+
+@app.get("/")
+@app.get("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 @app.post("/api/scrape")
 def start_scrape():
