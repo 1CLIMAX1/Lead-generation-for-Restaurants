@@ -31,7 +31,7 @@ from urllib.parse import urlparse, quote_plus
 import requests
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SERPER_API_KEY = ""           # or set env var SERPER_API_KEY
+SERPER_API_KEY = "5aaf23f2e9f016e38bb99da0f136d5f9f66e0f58"           # or set env var SERPER_API_KEY
 DELAY_SECONDS  = 1.2          # delay between API calls
 
 # ── RAW columns written to CSV ────────────────────────────────────────────────
