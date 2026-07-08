@@ -49,10 +49,12 @@ RAW_COLUMNS = [
 # Each source generates different Serper queries to find businesses
 PLATFORM_QUERIES = {
     "google":   [
-        '"{domain}" {location} contact number',
-        '{domain} {location} official website',
+        '{domain} {location} contact number',
+        '{domain} in {location}',
         '{domain} near {location}',
-        '{domain} {location} phone',
+        '{domain} {location} phone number',
+        '{domain} {location} address',
+        '{domain} {location} opening hours',
     ],
     "linkedin": [
         'site:linkedin.com/company "{domain}" "{location}"',
@@ -366,37 +368,10 @@ def parse_results(data: dict, business_domain: str, location: str,
         if lead["name"]:
             leads.append(lead)
 
-    # Organic results — one lead per result
-    for result in data.get("organic", []):
-        url     = result.get("link", "")
-        snippet = result.get("snippet", "")
-        title   = result.get("title", "")
-
-        name = extract_name_from_result(result, business_domain, location)
-        if not name:
-            continue
-        if is_junk_title(title):
-            continue
-
-        lead = _empty_lead(business_domain, location, source_platform, scraped_at, query)
-        lead["name"] = name
-
-        col = lookup_domain(url)
-        if col == "_reject":
-            pass
-        elif col in REFERRAL_COLUMNS:
-            lead[col] = url
-        elif col in PLATFORM_URL_COLUMNS:
-            lead[col] = url
-        elif is_official_website(url):
-            lead["website"] = url
-
-        if not lead["phone"]:
-            lead["phone"] = extract_phone(snippet)
-        if not lead["phone"]:
-            lead["phone"] = extract_phone(title)
-
-        leads.append(lead)
+    # Organic results — skipped intentionally.
+    # localResults (Google Maps) returns verified businesses with phones/addresses.
+    # Organic results mix in articles, directories, and listicles that are hard
+    # to filter reliably. More queries compensate for the lower per-query volume.
 
     # Dedupe within this batch by name
     seen  = set()
