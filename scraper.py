@@ -48,11 +48,11 @@ RAW_COLUMNS = [
 # ── Platform query templates ──────────────────────────────────────────────────
 # Each source generates different Serper queries to find businesses
 PLATFORM_QUERIES = {
-    "google": [
-    '"{domain}" {location} contact',
-    '"{domain}" {location} phone number',
-    '{domain} {location} official website',
-    '{domain} near {location}',
+    "google":   [
+        '"{domain}" {location} contact number',
+        '{domain} {location} official website',
+        '{domain} near {location}',
+        '{domain} {location} phone',
     ],
     "linkedin": [
         'site:linkedin.com/company "{domain}" "{location}"',
@@ -71,21 +71,25 @@ PLATFORM_QUERIES = {
     ],
 }
 
+# ── Junk title filter ─────────────────────────────────────────────────────────
+
 BAD_TITLE_WORDS = [
     "top", "best", "list", "near me", "guide", "review", "reviews",
     "comparison", "compare", "blog", "article", "2025", "2026",
     "directory", "places", "things to do", "ranked", "rating",
     "affordable", "cheap", "budget", "must visit", "worth it",
+    "ultimate", "complete", "comprehensive", "detailed", "popular",
 ]
 
 def is_junk_title(title: str) -> bool:
     t = title.lower()
     if any(w in t for w in BAD_TITLE_WORDS):
         return True
-    # Also reject if it looks like "5 best X" or "8 top Y"
-    if re.match(r"^\d+\s+(best|top|great|amazing)", t):
+    # Reject "5 best X" / "8 top Y" patterns
+    if re.match(r"^\d+\s+(best|top|great|amazing|popular)", t):
         return True
     return False
+
 
 # ── Master domain blocklist ───────────────────────────────────────────────────
 _TWO_PART_TLDS = {"co.in", "co.uk", "com.au", "co.nz", "co.za", "net.in"}
@@ -308,7 +312,23 @@ def extract_name_from_result(result: dict, domain: str, location: str) -> str:
     # Remove generic suffixes like "- Best X in Y" patterns
     title = re.sub(r"\s*[-|]\s*.{0,40}$", "", title).strip()
 
-    return title if len(title) > 2 else ""
+    if len(title) <= 2:
+        return ""
+    # Reject if what's left is just the domain keyword or city name
+    t_lower = title.lower()
+    if t_lower in (domain.lower(), location.lower()):
+        return ""
+    # Reject "Bhopal · gym" style leftovers
+    if re.match(r"^[\w\s]+·[\w\s]+$", title) and len(title.split()) <= 4:
+        parts = [p.strip().lower() for p in title.split("·")]
+        if all(p in (domain.lower(), location.lower()) for p in parts):
+            return ""
+    # Reject if no meaningful words beyond domain/city
+    stop = {domain.lower(), location.lower()}
+    words = [w for w in title.lower().split() if w not in stop]
+    if len(words) == 0:
+        return ""
+    return title
 
 
 # ── Result parser ─────────────────────────────────────────────────────────────
@@ -355,7 +375,7 @@ def parse_results(data: dict, business_domain: str, location: str,
         name = extract_name_from_result(result, business_domain, location)
         if not name:
             continue
-        if is_junk_title(result.get("title", "")):   # ← ADD THIS
+        if is_junk_title(title):
             continue
 
         lead = _empty_lead(business_domain, location, source_platform, scraped_at, query)
@@ -373,10 +393,8 @@ def parse_results(data: dict, business_domain: str, location: str,
 
         if not lead["phone"]:
             lead["phone"] = extract_phone(snippet)
-
-        # ADD: also try extracting from title for JustDial results  
-        if not lead["phone"] and "justdial" in url:
-            lead["phone"] = extract_phone(result.get("title", ""))
+        if not lead["phone"]:
+            lead["phone"] = extract_phone(title)
 
         leads.append(lead)
 
