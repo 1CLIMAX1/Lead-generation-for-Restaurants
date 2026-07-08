@@ -48,10 +48,11 @@ RAW_COLUMNS = [
 # ── Platform query templates ──────────────────────────────────────────────────
 # Each source generates different Serper queries to find businesses
 PLATFORM_QUERIES = {
-    "google":   [
-        "{domain} {location}",
-        "best {domain} in {location}",
-        "top {domain} {location}",
+    "google": [
+    '"{domain}" {location} contact',
+    '"{domain}" {location} phone number',
+    '{domain} {location} official website',
+    '{domain} near {location}',
     ],
     "linkedin": [
         'site:linkedin.com/company "{domain}" "{location}"',
@@ -69,6 +70,22 @@ PLATFORM_QUERIES = {
         'site:justdial.com {domain} {location}',
     ],
 }
+
+BAD_TITLE_WORDS = [
+    "top", "best", "list", "near me", "guide", "review", "reviews",
+    "comparison", "compare", "blog", "article", "2025", "2026",
+    "directory", "places", "things to do", "ranked", "rating",
+    "affordable", "cheap", "budget", "must visit", "worth it",
+]
+
+def is_junk_title(title: str) -> bool:
+    t = title.lower()
+    if any(w in t for w in BAD_TITLE_WORDS):
+        return True
+    # Also reject if it looks like "5 best X" or "8 top Y"
+    if re.match(r"^\d+\s+(best|top|great|amazing)", t):
+        return True
+    return False
 
 # ── Master domain blocklist ───────────────────────────────────────────────────
 _TWO_PART_TLDS = {"co.in", "co.uk", "com.au", "co.nz", "co.za", "net.in"}
@@ -338,6 +355,8 @@ def parse_results(data: dict, business_domain: str, location: str,
         name = extract_name_from_result(result, business_domain, location)
         if not name:
             continue
+        if is_junk_title(result.get("title", "")):   # ← ADD THIS
+            continue
 
         lead = _empty_lead(business_domain, location, source_platform, scraped_at, query)
         lead["name"] = name
@@ -354,6 +373,10 @@ def parse_results(data: dict, business_domain: str, location: str,
 
         if not lead["phone"]:
             lead["phone"] = extract_phone(snippet)
+
+        # ADD: also try extracting from title for JustDial results  
+        if not lead["phone"] and "justdial" in url:
+            lead["phone"] = extract_phone(result.get("title", ""))
 
         leads.append(lead)
 
