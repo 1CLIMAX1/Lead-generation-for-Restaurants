@@ -355,12 +355,8 @@ def parse_results(data: dict, business_domain: str, location: str,
         lead["phone"]  = extract_phone(kg.get("phoneNumber", ""))
         leads.append(lead)
 
-    # DEBUG — remove after confirming localResults work
-    print(f"    [debug] Serper keys returned: {list(data.keys())}")
-    print(f"    [debug] localResults count: {len(data.get('localResults', []))}")
-    print(f"    [debug] organic count: {len(data.get('organic', []))}")
-
-    # Local results — best source for Indian business phones
+    # Local results — best source for Indian business phones (paid Serper feature,
+    # may not be available on all plans but kept here for future use)
     for local in data.get("localResults", []):
         lead = _empty_lead(business_domain, location, source_platform, scraped_at, query)
         lead["name"]    = local.get("title", "").strip()
@@ -373,10 +369,56 @@ def parse_results(data: dict, business_domain: str, location: str,
         if lead["name"]:
             leads.append(lead)
 
-    # Organic results — skipped intentionally.
-    # localResults (Google Maps) returns verified businesses with phones/addresses.
-    # Organic results mix in articles, directories, and listicles that are hard
-    # to filter reliably. More queries compensate for the lower per-query volume.
+    # Organic results — filtered to only keep real business names
+    for result in data.get("organic", []):
+        url     = result.get("link", "")
+        snippet = result.get("snippet", "")
+        title   = result.get("title", "")
+
+        # Skip junk titles (articles, lists, directories)
+        if is_junk_title(title):
+            continue
+
+        name = extract_name_from_result(result, business_domain, location)
+        if not name:
+            continue
+
+        # Skip if name starts with a number ("1315 Used Cars", "420 Gyms")
+        if re.match(r"^\d+", name.strip()):
+            continue
+
+        # Skip if name is too long — real business names are short
+        # "Indore Luxury Car Dealerships" = 4 words and junk; real names are 1-4 words
+        word_count = len(name.split())
+        if word_count > 6:
+            continue
+
+        # Skip if the name is basically just domain+location with nothing else
+        meaningful = [w for w in name.lower().split()
+                      if w not in (business_domain.lower(), location.lower())
+                      and w not in ("and", "the", "of", "in", "&")]
+        if len(meaningful) == 0:
+            continue
+
+        lead = _empty_lead(business_domain, location, source_platform, scraped_at, query)
+        lead["name"] = name
+
+        col = lookup_domain(url)
+        if col == "_reject":
+            pass
+        elif col in REFERRAL_COLUMNS:
+            lead[col] = url
+        elif col in PLATFORM_URL_COLUMNS:
+            lead[col] = url
+        elif is_official_website(url):
+            lead["website"] = url
+
+        if not lead["phone"]:
+            lead["phone"] = extract_phone(snippet)
+        if not lead["phone"]:
+            lead["phone"] = extract_phone(title)
+
+        leads.append(lead)
 
     # Dedupe within this batch by name
     seen  = set()
