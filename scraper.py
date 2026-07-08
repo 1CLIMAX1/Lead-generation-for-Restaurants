@@ -355,6 +355,11 @@ def parse_results(data: dict, business_domain: str, location: str,
         lead["phone"]  = extract_phone(kg.get("phoneNumber", ""))
         leads.append(lead)
 
+    # DEBUG — remove after confirming localResults work
+    print(f"    [debug] Serper keys returned: {list(data.keys())}")
+    print(f"    [debug] localResults count: {len(data.get('localResults', []))}")
+    print(f"    [debug] organic count: {len(data.get('organic', []))}")
+
     # Local results — best source for Indian business phones
     for local in data.get("localResults", []):
         lead = _empty_lead(business_domain, location, source_platform, scraped_at, query)
