@@ -49,12 +49,12 @@ RAW_COLUMNS = [
 # Each source generates different Serper queries to find businesses
 PLATFORM_QUERIES = {
     "google":   [
-        '{domain} {location} contact number',
+        '{domain} {location}',
         '{domain} in {location}',
         '{domain} near {location}',
-        '{domain} {location} phone number',
-        '{domain} {location} address',
-        '{domain} {location} opening hours',
+        '{domain} {location} showroom',
+        '{domain} {location} shop',
+        '{domain} {location} centre',
     ],
     "linkedin": [
         'site:linkedin.com/company "{domain}" "{location}"',
